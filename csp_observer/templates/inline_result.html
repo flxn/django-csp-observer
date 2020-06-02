@@ -1,0 +1,8 @@
+<ul>
+{% for report in reports %}
+    <li>
+        <strong>{{ report.effective_directive }}</strong> 
+        for url: {{ report.blocked_url }}
+    </li>
+{% endfor %}
+<ul>

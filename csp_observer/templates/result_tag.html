@@ -1,0 +1,9 @@
+<div>
+    <strong>This is an inclusion_tag</strong>
+    <p>
+        Session ID: {{request.cspo_session_id}}<br/>
+        Please wait 15 seconds for completion.<br/>
+        Your CSP Reports will appear here:
+    </p>
+    <iframe src="{% url 'result' request.cspo_session_id %}" frameborder="0"></iframe>
+</div>

@@ -1,12 +1,17 @@
 import json
 import logging
-from django.shortcuts import render
+import time
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
 from pprint import pprint
 from .models import CspReport, Session
 from .report_utils import raw_report_to_model
+from . import settings as app_settings
 
 logger = logging.getLogger(__name__)
 
@@ -34,3 +39,18 @@ def report(request, session_id):
         logger.info("Report saved with id {}".format(report.id))
     
     return HttpResponse('')
+
+@xframe_options_exempt
+def result(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    
+    # check session creation date and wait at least RESULT_WAIT_TIME seconds before returning
+    current_time = timezone.now()
+    min_return_time = session.created_at + timedelta(seconds=app_settings.RESULT_WAIT_TIME)
+    if current_time <= min_return_time:
+        time.sleep((min_return_time - current_time).seconds) 
+
+    reports = session.cspreport_set.all()
+    return render(request, 'inline_result.html', {
+        'reports': reports
+    })

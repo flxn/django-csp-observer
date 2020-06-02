@@ -68,6 +68,7 @@ class CspReportMiddleware:
             if path_regex.match(request.path):
                 self.logger.debug("match for path {}".format(request.path))
                 session_id = self.create_session(request)
+                request.cspo_session_id = session_id
                 return self.add_csp_header(request, session_id)
         
         return self.get_response(request)
