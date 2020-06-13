@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.cache import never_cache
 from pprint import pprint
 from .models import CspReport, Session
 from .report_utils import raw_report_to_model
@@ -54,3 +56,8 @@ def result(request, session_id):
     return render(request, 'inline_result.html', {
         'reports': reports
     })
+
+@staff_member_required
+@never_cache
+def admin(request):
+    return render(request, 'admin/cspo_index.html')
