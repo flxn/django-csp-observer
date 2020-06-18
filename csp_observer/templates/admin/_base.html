@@ -9,6 +9,7 @@
 <meta name="description" content="A framework for launching new Django projects quickly.">
 <meta name="author" content="">
 <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
 
 {% block css %}
 <!-- Bootstrap CSS -->
@@ -30,11 +31,47 @@
     </div>
   </main>
 
-  <div class="container">
+  <div class="offset-md-1 col-md-10">
     {% block content %}
       <p>Default content...</p>
     {% endblock content %}
   </div>
+
+  <div class ="offset-md-1 col-md-10">
+    {% block reportTable %}
+      <p>Report Table...</p>
+    {% endblock reportTable %}
+  </div>
+
+  <br>
+  <br>
+  <div class="row offset-md-1" style="padding-bottom:50px;">
+
+    <div class="card" style="width: 35rem">
+      <div class="card-header">Diagram One</div>
+      <div class="card-body">
+        <h5 class="card-title">Diagram of something</h5>
+        <br>
+        <div>
+          <canvas id="diagramOne" style="max-width: 500px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card offset-md-1" style="width: 35rem">
+      <div class="card-header">Diagram Two</div>
+      <div class="card-body">
+        <h5 class="card-title">Another diagram</h5>
+        <br>
+        <div>
+          <canvas id="diagramTwo" style="max-width: 500px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="{% static '/js/pieCharts.js' %}"></script>
 
   <footer class="footer">
     <div class="container">

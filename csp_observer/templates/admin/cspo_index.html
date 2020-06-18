@@ -6,5 +6,45 @@
 {% block content %}
 
 <h1>Custom Admin Page</h1>
+<br>
 
 {% endblock content %}
+
+
+{% block reportTable %}
+<h3>Reports Table</h3>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">CSP error</th>
+      <th scope="col">Short description</th>
+      <th scope="col">Long description</th>
+      <th scope="col">Ignore event</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Copy All Links Mozilla Firefox Addon</td>
+      <td>Caused by Copy All Links Mozilla Firefox Addon.</td>
+      <td></td>
+      <td><button type="button" class="btn btn-outline-danger">Ignore</button></td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td><button type="button" class="btn btn-outline-danger">Ignore</button></td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td colspan="2"> </td>
+      <td> </td>
+      <td><button type="button" class="btn btn-outline-danger">Ignore</button></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock reportTable %}
+
