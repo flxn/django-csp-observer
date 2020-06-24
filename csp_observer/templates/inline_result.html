@@ -3,6 +3,10 @@
     <li>
         <strong>{{ report.effective_directive }}</strong> 
         for url: {{ report.blocked_url }}
+        {% for rule in report.matching_rules.all %}
+        <br/>
+        <strong> => Matched Rule Title: </strong> {{ rule.title }}
+        {% endfor %}
     </li>
 {% endfor %}
 <ul>
