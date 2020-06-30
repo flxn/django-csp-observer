@@ -4,6 +4,7 @@ import json
 from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
+from django.templatetags.static import static
 
 class CspReportMiddleware:
     def __init__(self, get_response):
@@ -33,9 +34,8 @@ class CspReportMiddleware:
         self.logger.debug("session created: {}".format(session.id))
         return session.id
 
-    def add_csp_header(self, request, session_id):
+    def add_csp_header(self, request, response, session_id):
         """Adds a CSP header to the response, returns the response"""
-        response = self.get_response(request)
         report_uri = request.build_absolute_uri(reverse('report', args=(session_id, )))
         # set fallback reporting directive
         reporting_directives = [
@@ -62,6 +62,13 @@ class CspReportMiddleware:
 
         return response
 
+    def add_tripwire(self, request, response, session_id):
+        tripwire_js_path = static('js/tripwire.js')
+        tripwire_js_uri = request.build_absolute_uri(tripwire_js_path)
+        script_tag_string = '<script type="text/javascript" data-session="{}" src="{}"></script>'.format(session_id, tripwire_js_uri)
+        response.content = response.content.replace(b'</body>', str.encode(script_tag_string + '</body>'))
+        return response
+
     def __call__(self, request):
         # check if path in enabled paths
         for path_regex in self.paths_regex:
@@ -69,6 +76,9 @@ class CspReportMiddleware:
                 self.logger.debug("match for path {}".format(request.path))
                 session_id = self.create_session(request)
                 request.cspo_session_id = session_id
-                return self.add_csp_header(request, session_id)
+                response = self.get_response(request)
+                response = self.add_csp_header(request, response, session_id)
+                response = self.add_tripwire(request, response, session_id)
+                return response
         
         return self.get_response(request)
