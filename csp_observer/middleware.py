@@ -1,6 +1,7 @@
 import re
 import logging
 import json
+import base64
 from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
@@ -16,7 +17,7 @@ class CspReportMiddleware:
         if app_settings.REPORT_ONLY:
             self.csp_header_name = "Content-Security-Policy-Report-Only"
         
-        self.csp_policies = app_settings.CSP_POLICIES
+        self.csp_policy = app_settings.CSP_POLICIES
         # compile regexes for all enabled paths
         self.paths_regex = [re.compile("^{}$".format(p)) for p in app_settings.ENABLED_PATHS]
 
@@ -34,7 +35,7 @@ class CspReportMiddleware:
         self.logger.debug("session created: {}".format(session.id))
         return session.id
 
-    def add_csp_header(self, request, response, session_id):
+    def get_csp_policy(self, request, session_id):
         """Adds a CSP header to the response, returns the response"""
         report_uri = request.build_absolute_uri(reverse('report', args=(session_id, )))
         # set fallback reporting directive
@@ -57,15 +58,23 @@ class CspReportMiddleware:
             response["Report-To"] = json.dumps(report_to_group_definition)
 
         # build final csp policy directive string
-        final_csp_policies = self.csp_policies + reporting_directives
-        response[self.csp_header_name] = "; ".join(final_csp_policies)
+        final_csp_policy = self.csp_policy + reporting_directives
+        final_csp_policy = "; ".join(final_csp_policy)
+        return final_csp_policy
 
+    def add_csp_header(self, request, response, session_id):
+        policy = self.get_csp_policy(request, session_id)
+        response[self.csp_header_name] = policy
         return response
 
     def add_tripwire(self, request, response, session_id):
         tripwire_js_path = static('js/tripwire.js')
         tripwire_js_uri = request.build_absolute_uri(tripwire_js_path)
-        script_tag_string = '<script type="text/javascript" data-session="{}" src="{}"></script>'.format(session_id, tripwire_js_uri)
+        
+        policy = self.get_csp_policy(request, session_id)
+        policy_b64 = base64.b64encode(str.encode(policy)).decode()
+
+        script_tag_string = '<script type="text/javascript" data-session="{}" data-policy="{}" src="{}"></script>'.format(session_id, policy_b64, tripwire_js_uri)
         response.content = response.content.replace(b'</body>', str.encode(script_tag_string + '</body>'))
         return response
 
