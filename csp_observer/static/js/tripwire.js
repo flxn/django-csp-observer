@@ -4,7 +4,7 @@ var timer = null;
 var sessionId = null;
 var policy = null;
 var debug = true;
-var checkedTags = [];
+var detectedElements = [];
 
 function PolicyParser(policyString) {
     this.policy = policyString.split(/;/);
@@ -26,15 +26,7 @@ function PolicyParser(policyString) {
 PolicyParser.prototype.checkElementAllowed = function (htmlElement) {
     var directive = this.directives['default-src'];
 
-    // extract source path
-    // TODO: think about edge cases, maybe too generic right now
     var sourcePath = htmlElement.getAttribute('src')
-    if (!sourcePath) {
-        sourcePath = htmlElement.getAttribute('href')
-    }
-    if (!sourcePath) {
-        return true;
-    }
 
     switch (htmlElement.tagName.toLowerCase()) {
         case 'script':
@@ -53,6 +45,7 @@ PolicyParser.prototype.checkElementAllowed = function (htmlElement) {
                 && Object.keys(this.directives).indexOf('style-src') !== -1) {
                 directive = this.directives['style-src'];
             }
+            sourcePath = htmlElement.getAttribute('href');
             break;
         case 'audio':
         case 'video':
@@ -74,6 +67,10 @@ PolicyParser.prototype.checkElementAllowed = function (htmlElement) {
             break;
         default:
             return true;
+    }
+
+    if (!sourcePath) {
+        return true;
     }
 
     // TODO: implement better path matching
@@ -111,11 +108,14 @@ function init() {
         // iterate through all elements on the page
         var elements = document.getElementsByTagName('*');
         for (var i = 0; i < elements.length; i++) {
-            var allowed = policyParser.checkElementAllowed(elements[i]);
-            if (!allowed) {
-                if (debug) console.log("### Tripwire activated ###")
-                if (debug) console.log(elements[i])
-                if (debug) console.log("##########################")
+            if (detectedElements.indexOf(elements[i]) === -1) {
+                var allowed = policyParser.checkElementAllowed(elements[i]);
+                if (!allowed) {
+                    detectedElements.push(elements[i]);
+                    if (debug) console.log("### Tripwire activated ###");
+                    if (debug) console.log(elements[i]);
+                    if (debug) console.log("##########################");
+                }
             }
         }
     }, scanInterval);
