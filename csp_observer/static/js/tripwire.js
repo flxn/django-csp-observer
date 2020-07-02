@@ -1,11 +1,3 @@
-var scanInterval = 5000;
-var scanTimeout = 30000;
-var timer = null;
-var sessionId = null;
-var policy = null;
-var debug = true;
-var detectedElements = [];
-
 function PolicyParser(policyString) {
     this.policy = policyString.split(/;/);
     this.directives = {};
@@ -16,6 +8,7 @@ function PolicyParser(policyString) {
         var parts = directive.split(/\s+/);
         var name = parts[0].trim();
         var value = parts[1].trim();
+        // remove leading and trailing quotes from directive values
         value = value.replace(/^[\"\']+|[\"\']+$/g, "");
         this.directives[name] = value;
     }
@@ -23,107 +16,175 @@ function PolicyParser(policyString) {
     return this;
 }
 
-PolicyParser.prototype.checkElementAllowed = function (htmlElement) {
-    var directive = this.directives['default-src'];
-
+PolicyParser.prototype.getViolation = function (htmlElement) {
     var sourcePath = htmlElement.getAttribute('src')
+    var matchingDirective = 'default-src';
 
     switch (htmlElement.tagName.toLowerCase()) {
         case 'script':
-            if (Object.keys(this.directives).indexOf('script-src') !== -1) {
-                directive = this.directives['script-src'];
-            }
+            matchingDirective = 'script-src';
             break;
         case 'img':
-            if (Object.keys(this.directives).indexOf('img-src') !== -1) {
-                directive = this.directives['img-src'];
-            }
+            matchingDirective = 'img-src';
             break;
         case 'link':
             // TODO: there are multiple types of link tags that should also be handled
-            if (htmlElement.getAttribute('rel') === 'stylesheet'
-                && Object.keys(this.directives).indexOf('style-src') !== -1) {
-                directive = this.directives['style-src'];
+            if (htmlElement.getAttribute('rel') === 'stylesheet') {
+                matchingDirective = 'style-src'
             }
             sourcePath = htmlElement.getAttribute('href');
             break;
         case 'audio':
         case 'video':
-            if (Object.keys(this.directives).indexOf('media-src') !== -1) {
-                directive = this.directives['media-src'];
-            }
+            matchingDirective = 'media-src';
             break;
         case 'iframe':
-            if (Object.keys(this.directives).indexOf('frame-src') !== -1) {
-                directive = this.directives['frame-src'];
-            }
+            matchingDirective = 'frame-src';
             break;
         case 'embed':
         case 'object':
         case 'applet':
-            if (Object.keys(this.directives).indexOf('object-src') !== -1) {
-                directive = this.directives['object-src'];
-            }
+            matchingDirective = 'object-src';
             break;
         default:
-            return true;
+            return null;
     }
 
     if (!sourcePath) {
-        return true;
+        return null;
+    }
+
+    var directive;
+    if (Object.keys(this.directives).indexOf(matchingDirective) !== -1) {
+        directive = this.directives[matchingDirective];
+    } else {
+        directive = this.directives['default-src'];
     }
 
     // TODO: implement better path matching
     if (directive === '*') {
-        return true;
+        return null;
     } else if (directive === 'self') {
-        return (sourcePath[0] === '/' || sourcePath.indexOf(location.href) !== -1)
+        if (sourcePath[0] !== '/' && sourcePath.indexOf(location.href) === -1) {
+            return {
+                source: sourcePath,
+                directive: matchingDirective
+            };
+        } else {
+            return null;
+        }
+    } else if (sourcePath.indexOf(directive) === -1) {
+        return {
+            source: sourcePath,
+            directive: matchingDirective
+        };
     } else {
-        return sourcePath.indexOf(directive) !== -1
+        return null;
     }
-
 }
 
-function init() {
-    sessionId = document.currentScript.getAttribute('data-session');
-    if (!sessionId) {
+function Tripwire() {
+    this.scanInterval = 5000;
+    this.scanTimeout = 30000;
+    this.timer = null;
+    this.sessionId = null;
+    this.reportUri = null;
+    this.debug = true;
+    this.policyString = "";
+    this.reportData = [];
+    this.detectedElements = [];
+
+    return this;
+}
+
+Tripwire.prototype.init = function () {
+    this.sessionId = document.currentScript.getAttribute('data-session');
+    if (!this.sessionId) {
         console.log("Tripwire could not be initialized: No session passed");
         return;
     }
 
-    policy = document.currentScript.getAttribute('data-policy');
+    this.reportUri = document.currentScript.getAttribute('data-report-uri');
+    if (!this.reportUri) {
+        console.log("Tripwire could not be initialized: No report URI passed");
+        return;
+    } 
+
+    var policy = document.currentScript.getAttribute('data-policy');
     if (!policy) {
         console.log("Tripwire could not be initialized: No policy passed");
         return;
     }
-    var policyString = atob(policy);
-    var policyParser = new PolicyParser(policyString);
+    this.policyString = atob(policy);
 
-    if (debug) console.log("### Tripwire loaded ###");
-    if (debug) console.log("CSP Observer Session ID:", sessionId);
-    if (debug) console.log("Scan Interval:", scanInterval, "ms");
-    if (debug) console.log("Active Policy:", policyString);
+    if (this.debug) {
+        console.log("### Tripwire loaded ###");
+        console.log("CSP Observer Session ID:", this.sessionId);
+        console.log("Scan Interval:", this.scanInterval, "ms");
+        console.log("Active Policy:", this.policyString);
+        console.log("Tripwire Report URI:", this.reportUri);
+    }
 
-    timer = setInterval(function () {
-        // iterate through all elements on the page
-        var elements = document.getElementsByTagName('*');
-        for (var i = 0; i < elements.length; i++) {
-            if (detectedElements.indexOf(elements[i]) === -1) {
-                var allowed = policyParser.checkElementAllowed(elements[i]);
-                if (!allowed) {
-                    detectedElements.push(elements[i]);
-                    if (debug) console.log("### Tripwire activated ###");
-                    if (debug) console.log(elements[i]);
-                    if (debug) console.log("##########################");
+    // start scan
+    this.timer = setInterval(
+        (function(self) {
+            return function() {
+                self.scan();
+            }
+        })(this), this.scanInterval);
+
+    // stop scan after scanTimeout milliseconds
+    setTimeout(
+        (function(self) {
+            return function() {
+                clearTimeout(self.timer);
+            }
+        })(this), this.scanTimeout);
+}
+
+Tripwire.prototype.scan = function () {
+    var policyParser = new PolicyParser(this.policyString);
+    // iterate through all elements on the page
+    var elements = document.getElementsByTagName('*');
+    for (var i = 0; i < elements.length; i++) {
+        if (this.detectedElements.indexOf(elements[i]) === -1) {
+            var violation = policyParser.getViolation(elements[i]);
+            if (!!violation) {
+                this.detectedElements.push(elements[i]);
+                this.reportData.push({
+                    'violation': violation.directive,
+                    'source': violation.source
+                })
+                if (this.debug) {
+                    console.log("### Tripwire activated ###");
+                    console.log(elements[i]);
+                    console.log("##########################");
                 }
             }
         }
-    }, scanInterval);
+    }
 
-    // stop scan after scanTimeout milliseconds
-    setTimeout(function () {
-        clearInterval(timer);
-    }, scanTimeout);
+    this.sendReport();
 }
 
-init();
+Tripwire.prototype.sendReport = function () {
+    var xhr = new XMLHttpRequest();
+    xhr.onload = () => {
+        if (this.debug) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                console.log("Tripwire Violation Report sent successfully");
+            } else {
+                console.log("Error sending Tripwire Violation Report. Status:", xhr.status);
+            }
+            
+        }
+    };
+
+    xhr.open('POST', this.reportUri);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.send(JSON.stringify(this.reportData));
+}
+
+var tripwire = new Tripwire();
+tripwire.init();

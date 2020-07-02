@@ -6,6 +6,7 @@ from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
 from django.templatetags.static import static
+from .report_handlers import REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 
 class CspReportMiddleware:
     def __init__(self, get_response):
@@ -37,7 +38,7 @@ class CspReportMiddleware:
 
     def get_csp_policy(self, request, session_id):
         """Adds a CSP header to the response, returns the response"""
-        report_uri = request.build_absolute_uri(reverse('report', args=(session_id, )))
+        report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_CSP, session_id, )))
         # set fallback reporting directive
         reporting_directives = [
             "report-uri {}".format(report_uri),
@@ -74,7 +75,14 @@ class CspReportMiddleware:
         policy = self.get_csp_policy(request, session_id)
         policy_b64 = base64.b64encode(str.encode(policy)).decode()
 
-        script_tag_string = '<script type="text/javascript" data-session="{}" data-policy="{}" src="{}"></script>'.format(session_id, policy_b64, tripwire_js_uri)
+        tripwire_report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_TRIPWIRE, session_id, )))
+
+        script_tag_string = '<script type="text/javascript" data-session="{}" data-policy="{}" data-report-uri="{}" src="{}"></script>'.format(
+            session_id, 
+            policy_b64, 
+            tripwire_report_uri,
+            tripwire_js_uri
+        )
         response.content = response.content.replace(b'</body>', str.encode(script_tag_string + '</body>'))
         return response
 

@@ -12,39 +12,22 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from pprint import pprint
 from .models import CspReport, Session
-from .report_utils import raw_report_to_model
-from .rule_evaluator import CspRuleEvaluator
+from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
 
 logger = logging.getLogger(__name__)
 
 @require_POST
 @csrf_exempt
-def report(request, session_id):
+def report(request, report_type, session_id):
     report_str = request.body.decode('utf-8')
     report_data = json.loads(report_str)
 
-    if not 'csp-report' in report_data:
-        return HttpResponse('')
+    if report_type == REPORT_TYPE_CSP:
+        handle_csp_report(report_data, session_id)
+    elif report_type == REPORT_TYPE_TRIPWIRE:
+        handle_tripwire_report(report_data, session_id)
 
-    csp_report_raw = report_data['csp-report']
-    logger.info("Received CSP report")
-    logger.info("Session ID: {}".format(session_id))
-    logger.info("Report Data: {}".format(csp_report_raw))
-
-    try:
-        session = Session.objects.get(id=session_id)
-    except Session.DoesNotExist:
-        return HttpResponse('')
-    else:
-        report = raw_report_to_model(csp_report_raw, session)
-        evaluator = CspRuleEvaluator()
-        has_been_added = evaluator.evaluate_and_save(report)
-        if has_been_added:
-            logger.info("Report saved with id {}".format(report.id))
-        else:
-            logger.info("Report will be ignored")
-    
     return HttpResponse('')
 
 @xframe_options_exempt
