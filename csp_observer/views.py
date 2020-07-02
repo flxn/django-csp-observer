@@ -13,6 +13,7 @@ from django.views.decorators.cache import never_cache
 from pprint import pprint
 from .models import CspReport, Session
 from .report_utils import raw_report_to_model
+from .rule_evaluator import CspRuleEvaluator
 from . import settings as app_settings
 
 logger = logging.getLogger(__name__)
@@ -37,8 +38,12 @@ def report(request, session_id):
         return HttpResponse('')
     else:
         report = raw_report_to_model(csp_report_raw, session)
-        report.save()
-        logger.info("Report saved with id {}".format(report.id))
+        evaluator = CspRuleEvaluator()
+        has_been_added = evaluator.evaluate_and_save(report)
+        if has_been_added:
+            logger.info("Report saved with id {}".format(report.id))
+        else:
+            logger.info("Report will be ignored")
     
     return HttpResponse('')
 
