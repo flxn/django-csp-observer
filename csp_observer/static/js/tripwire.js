@@ -152,7 +152,8 @@ Tripwire.prototype.scan = function () {
             if (!!violation) {
                 this.detectedElements.push(elements[i]);
                 this.reportData.push({
-                    'violation': violation.directive,
+                    'document': location.href,
+                    'directive': violation.directive,
                     'source': violation.source
                 })
                 if (this.debug) {

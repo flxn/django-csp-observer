@@ -52,12 +52,48 @@ def handle_csp_report(report_data, session_id):
     else:
         report = raw_csp_report_to_model(csp_report_raw, session)
         evaluator = CspRuleEvaluator()
-        has_been_added = evaluator.evaluate_and_save(report)
-        if has_been_added:
+        matching_rules, ignore = evaluator.evaluate_report(report)
+        if not ignore:
+            report.save()    
+            report.matching_rules.add(*matching_rules)
             logger.info("Report saved with id {}".format(report.id))
         else:
             logger.info("Report will be ignored")
     
 def handle_tripwire_report(report_data, session_id):
     logger.info("Received Tripwire report")
-    logger.info("Report Data: {}".format(report_data))
+    reports = []
+    try:
+        session = Session.objects.get(id=session_id)
+    except Session.DoesNotExist:
+        return
+    else:
+        reports = session.cspreport_set.all()
+    
+    for violation in report_data:
+        # check if violation should be ignored
+        evaluator = CspRuleEvaluator()
+        _, ignore = evaluator.evaluate_directive(violation['source'], violation['directive'])
+        if ignore:
+            continue
+        
+        # compare violation with already known reports
+        unknown_violation = True
+        for report in reports:
+            if violation['source'] == report.blocked_url and violation['directive'] in report.effective_directive:
+                unknown_violation = False
+                break
+        
+        if unknown_violation:
+            # violation detected
+            logger.info("Possible injection detected. Unreported violation:")
+            logger.info(violation)
+            # create and save new report
+            new_report = CspReport()
+            new_report.session = session
+            new_report.blocked_url = violation['source']
+            new_report.effective_directive = violation['directive']
+            new_report.document_url = violation['document']
+            new_report.disposition = REPORT_TYPE_TRIPWIRE
+            new_report.save()
+            logger.info("Report saved with id {}".format(new_report.id))
