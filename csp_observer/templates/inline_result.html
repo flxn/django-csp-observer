@@ -2,7 +2,7 @@
 {% for report in reports %}
     <li>
         <strong>{{ report.effective_directive }}</strong> 
-        for url: {{ report.blocked_url }}
+        for url: {{ report.blocked_url }} ({{ report.disposition }})
         {% for rule in report.matching_rules.all %}
         <br/>
         <strong> => Matched Rule Title: </strong> {{ rule.title }}

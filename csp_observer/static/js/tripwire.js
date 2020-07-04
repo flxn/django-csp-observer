@@ -7,16 +7,14 @@ function PolicyParser(policyString) {
         var directive = this.policy[i].trim();
         var parts = directive.split(/\s+/);
         var name = parts[0].trim();
-        var value = parts[1].trim();
-        // remove leading and trailing quotes from directive values
-        value = value.replace(/^[\"\']+|[\"\']+$/g, "");
+        var value = parts.slice(1);
         this.directives[name] = value;
     }
 
     return this;
 }
 
-PolicyParser.prototype.getViolation = function (htmlElement) {
+PolicyParser.prototype.getDirectiveForElement = function (htmlElement) {
     // get default path from element's src attribute
     var sourcePath = htmlElement.getAttribute('src')
     var matchingDirective = 'default-src';
@@ -29,7 +27,6 @@ PolicyParser.prototype.getViolation = function (htmlElement) {
             matchingDirective = 'img-src';
             break;
         case 'link':
-            // TODO: there are multiple types of link tags that should also be handled
             switch (htmlElement.getAttribute('rel')) {
                 case 'stylesheet':
                     matchingDirective = 'style-src-elem'
@@ -66,33 +63,43 @@ PolicyParser.prototype.getViolation = function (htmlElement) {
         return null;
     }
 
-    var directive;
-    if (Object.keys(this.directives).indexOf(matchingDirective) !== -1) {
-        directive = this.directives[matchingDirective];
-    } else {
-        directive = this.directives['default-src'];
+    return {
+        directive: matchingDirective,
+        source: sourcePath
+    }
+}
+
+PolicyParser.prototype.getViolation = function (htmlElement) {
+    var elementInfo = this.getDirectiveForElement(htmlElement)
+    
+    if (!elementInfo) {
+        return null;
     }
 
-    // TODO: implement better path matching
-    if (directive === '*') {
-        return null;
-    } else if (directive === 'self') {
-        if (sourcePath[0] !== '/' && sourcePath.indexOf(location.href) === -1) {
-            return {
-                source: sourcePath,
-                directive: matchingDirective
-            };
-        } else {
-            return null;
-        }
-    } else if (sourcePath.indexOf(directive) === -1) {
-        return {
-            source: sourcePath,
-            directive: matchingDirective
-        };
+    var directivePaths;
+    if (Object.keys(this.directives).indexOf(elementInfo.directive) !== -1) {
+        directivePaths = this.directives[elementInfo.directive];
     } else {
-        return null;
+        directivePaths = this.directives['default-src'];
     }
+
+    var pathAllowed = false;
+    for (var i = 0; i < directivePaths.length; i++) {
+        var path = directivePaths[i];
+        // remove leading and trailing quotes from directive values
+        path = path.replace(/^[\"\']+|[\"\']+$/g, '');
+        if (path === 'self') {
+            if (elementInfo.source[0] === '/' || elementInfo.source.indexOf(location.href) === 0) {
+                pathAllowed = true;
+            }
+        } else if (elementInfo.source.indexOf(path) === 0) {
+            pathAllowed = true;
+        } else if (path === '*') {
+            pathAllowed = true;
+        }
+    } 
+    
+    return pathAllowed ? null : elementInfo;
 }
 
 function Tripwire() {
@@ -171,7 +178,6 @@ Tripwire.prototype.scan = function () {
                 if (this.debug) {
                     console.log("### Tripwire activated ###");
                     console.log(elements[i]);
-                    console.log("##########################");
                 }
             }
         }
