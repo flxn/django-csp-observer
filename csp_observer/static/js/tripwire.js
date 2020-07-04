@@ -17,22 +17,34 @@ function PolicyParser(policyString) {
 }
 
 PolicyParser.prototype.getViolation = function (htmlElement) {
+    // get default path from element's src attribute
     var sourcePath = htmlElement.getAttribute('src')
     var matchingDirective = 'default-src';
 
     switch (htmlElement.tagName.toLowerCase()) {
         case 'script':
-            matchingDirective = 'script-src';
+            matchingDirective = 'script-src-elem';
             break;
         case 'img':
             matchingDirective = 'img-src';
             break;
         case 'link':
             // TODO: there are multiple types of link tags that should also be handled
-            if (htmlElement.getAttribute('rel') === 'stylesheet') {
-                matchingDirective = 'style-src'
+            switch (htmlElement.getAttribute('rel')) {
+                case 'stylesheet':
+                    matchingDirective = 'style-src-elem'
+                    sourcePath = htmlElement.getAttribute('href');
+                    break;
+                case 'manifest':
+                    matchingDirective = 'manifest-src'
+                    sourcePath = htmlElement.getAttribute('href');
+                    break;
+                case 'prefetch':
+                case 'prerender':
+                    matchingDirective = 'prefetch-src'
+                    break;
+                default:
             }
-            sourcePath = htmlElement.getAttribute('href');
             break;
         case 'audio':
         case 'video':
