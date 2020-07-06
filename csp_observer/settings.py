@@ -15,3 +15,5 @@ CSP_POLICIES = ns_getattr(settings, 'CSP_POLICIES', [
 
 ENABLE_NEW_API = ns_getattr(settings, 'ENABLE_NEW_API', False)
 RESULT_WAIT_TIME = 10
+
+SESSION_KEEP_DAYS = 14
