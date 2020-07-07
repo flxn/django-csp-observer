@@ -10,7 +10,7 @@ ENABLED_PATHS = ns_getattr(settings, 'ENABLED_PATHS', [
 ])
 
 CSP_POLICIES = ns_getattr(settings, 'CSP_POLICIES', [
-    "default-src 'self'",
+    "default-src 'self'; script-src 'self' 'unsafe-inline';",
 ])
 
 ENABLE_NEW_API = ns_getattr(settings, 'ENABLE_NEW_API', False)
