@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 @require_POST
 @csrf_exempt
 def report(request, report_type, session_id):
+    if app_settings.REMOTE_REPORTING:
+        # don't do anything if remote reporting is enabled
+        return HttpResponse('')
+
     report_str = request.body.decode('utf-8')
     report_data = json.loads(report_str)
 
@@ -32,6 +36,10 @@ def report(request, report_type, session_id):
 
 @xframe_options_exempt
 def result(request, session_id):
+    if app_settings.REMOTE_REPORTING:
+        # don't do anything if remote reporting is enabled
+        return HttpResponse('')
+
     session = get_object_or_404(Session, pk=session_id)
     
     # check session creation date and wait at least RESULT_WAIT_TIME seconds before returning
@@ -44,6 +52,14 @@ def result(request, session_id):
     return render(request, 'inline_result.html', {
         'reports': reports
     })
+
+@require_POST
+@csrf_exempt
+def master_session(request):
+    if not app_settings.IS_MASTER_COLLECTOR:
+        return HttpResponse('')
+    
+    return HttpResponse(request)
 
 @staff_member_required
 @never_cache

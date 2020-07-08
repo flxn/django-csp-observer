@@ -2,6 +2,7 @@ import re
 import logging
 import json
 import base64
+import uuid
 from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
@@ -38,7 +39,10 @@ class CspReportMiddleware:
 
     def get_csp_policy(self, request, session_id):
         """Adds a CSP header to the response, returns the response"""
-        report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_CSP, session_id, )))
+        if app_settings.REMOTE_REPORTING:
+            report_uri = "{}/{}/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, REPORT_TYPE_CSP, session_id)
+        else:
+            report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_CSP, session_id, )))
         # set fallback reporting directive
         reporting_directives = [
             "report-uri {}".format(report_uri),
@@ -75,7 +79,10 @@ class CspReportMiddleware:
         policy = self.get_csp_policy(request, session_id)
         policy_b64 = base64.b64encode(str.encode(policy)).decode()
 
-        tripwire_report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_TRIPWIRE, session_id, )))
+        if app_settings.REMOTE_REPORTING:
+            tripwire_report_uri = "{}/{}/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, REPORT_TYPE_TRIPWIRE, session_id)
+        else:
+            tripwire_report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_TRIPWIRE, session_id, )))
 
         script_tag_string = '<script type="text/javascript" data-session="{}" data-policy="{}" data-report-uri="{}" src="{}"></script>'.format(
             session_id, 
@@ -91,7 +98,10 @@ class CspReportMiddleware:
         for path_regex in self.paths_regex:
             if path_regex.match(request.path):
                 self.logger.debug("match for path {}".format(request.path))
-                session_id = self.create_session(request)
+                if app_settings.REMOTE_REPORTING:
+                    session_id = str(uuid.uuid4())
+                else:
+                    session_id = self.create_session(request)
                 request.cspo_session_id = session_id
                 response = self.get_response(request)
                 response = self.add_csp_header(request, response, session_id)
