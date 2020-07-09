@@ -20,8 +20,7 @@ class CspReportMiddleware:
         self.csp_header_name = "Content-Security-Policy"
         if app_settings.REPORT_ONLY:
             self.csp_header_name = "Content-Security-Policy-Report-Only"
-        
-        self.csp_policy = app_settings.CSP_POLICIES
+
         # compile regexes for all enabled paths
         self.paths_regex = [re.compile("^{}$".format(p)) for p in app_settings.ENABLED_PATHS]
 
@@ -52,12 +51,12 @@ class CspReportMiddleware:
         else:
             report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_CSP, session_id, )))
         # set fallback reporting directive
-        reporting_directives = [
-            "report-uri {}".format(report_uri),
-        ]
+        middleware_directives = {
+            'report-uri': [report_uri],
+        }
 
         if app_settings.REMOTE_REPORTING:
-            reporting_directives.append('connect-src {}/'.format(app_settings.REMOTE_CSP_OBSERVER_URL))
+            middleware_directives['connect-src'] = [app_settings.REMOTE_CSP_OBSERVER_URL + "/"]
 
         # New Reporting API stuff (not working?!):
         # https://w3c.github.io/reporting/
@@ -71,13 +70,22 @@ class CspReportMiddleware:
             }]
         }
         if app_settings.ENABLE_NEW_API:
-            reporting_directives.append("report-to {}".format(self.reporting_group_name))
+            middleware_directives['report-to'] = [self.reporting_group_name]
             response["Report-To"] = json.dumps(report_to_group_definition)
 
-        # build final csp policy directive string
-        final_csp_policy = self.csp_policy + reporting_directives
-        final_csp_policy = "; ".join(final_csp_policy)
-        return final_csp_policy
+        # merge custom csp policy from settings with required middleware directives
+        final_csp_policy = app_settings.CSP_POLICIES
+        for directive, values in middleware_directives.items():
+            if directive in final_csp_policy and directive != 'report-uri':
+                final_csp_policy[directive] = set(list(final_csp_policy[directive]) + list(values))
+            else:
+                final_csp_policy[directive] = values
+        # build csp header string
+        csp_policy_string = ""
+        for directive, values in final_csp_policy.items():
+            csp_policy_string += "{} {}; ".format(directive, " ".join(values))
+
+        return csp_policy_string
 
     def add_csp_header(self, request, response, session_id):
         policy = self.get_csp_policy(request, session_id)

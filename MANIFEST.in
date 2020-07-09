@@ -1,0 +1,4 @@
+include LICENSE
+include README.md
+recursive-include csp_observer/static *
+recursive-include csp_observer/templates *
