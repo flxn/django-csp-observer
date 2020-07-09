@@ -1,22 +1,24 @@
-import json
-import logging
-import time
+
 import urllib.parse
 import urllib.request
-from .models import Session
 from . import settings as app_settings
 
-def create_master_session(user_agent, anonymized_ip):
-    remote_url = "{}/master/session".format(app_settings.REMOTE_CSP_OBSERVER_URL.rstrip('/'))
+async def create_master_session(request, session_id):
+    """Creates a remote session on the master collector instance"""
+    # TODO: is there a better way for programmatic path reversing on a remote host?
+    remote_url = "{}/master/session/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL.rstrip('/'), session_id)
     raw_data = {
-        'user_agent': user_agent,
-        'anonymized_ip': anonymized_ip
+        'secret': app_settings.REMOTE_SECRET,
+        'user_agent': request.META["HTTP_USER_AGENT"],
+        'anonymized_ip': '123'#self.anonymize_ip(request.META["REMOTE_ADDR"])
     }
     data = urllib.parse.urlencode(raw_data)
     data = data.encode('ascii')
     req = urllib.request.Request(remote_url, data)
-    with urllib.request.urlopen(req) as response:
-        status = response.status
-        res_data = response.read()
-        print(status, res_data)
-        
+    try:
+        with urllib.request.urlopen(req) as response:
+            status = response.status
+            res_data = response.read()
+            print(status, res_data)
+    except urllib.request.URLError as e:
+        print(e)

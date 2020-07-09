@@ -17,10 +17,9 @@ from . import settings as app_settings
 
 logger = logging.getLogger(__name__)
 
-@require_POST
 @csrf_exempt
 def report(request, report_type, session_id):
-    if app_settings.REMOTE_REPORTING:
+    if app_settings.REMOTE_REPORTING or request.method != 'POST':
         # don't do anything if remote reporting is enabled
         return HttpResponse('')
 
@@ -55,11 +54,26 @@ def result(request, session_id):
 
 @require_POST
 @csrf_exempt
-def master_session(request):
+def master_session(request, session_id):
     if not app_settings.IS_MASTER_COLLECTOR:
         return HttpResponse('')
-    
-    return HttpResponse(request)
+    if not app_settings.REMOTE_SECRET or len(app_settings.REMOTE_SECRET) == 0:
+        return HttpResponse('')
+    if not app_settings.REMOTE_SECRET == request.POST['secret']:
+        return HttpResponse('')
+
+    user_agent = request.POST['user_agent']
+    anonymized_ip = request.POST['anonymized_ip']
+    session = Session(
+        id=session_id,
+        user_agent=user_agent,
+        anonymized_ip=anonymized_ip
+    )
+    session.save()
+    logger.debug("created session {}".format(session.id))
+    return session.id
+
+    return HttpResponse('')
 
 @staff_member_required
 @never_cache
