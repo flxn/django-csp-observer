@@ -13,38 +13,33 @@ from django.views.decorators.cache import never_cache
 from pprint import pprint
 from django.views import generic
 from .models import CspReport, Session
-from .report_utils import raw_report_to_model
+from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
 
 logger = logging.getLogger(__name__)
 
-@require_POST
 @csrf_exempt
-def report(request, session_id):
+def report(request, report_type, session_id):
+    if app_settings.REMOTE_REPORTING or request.method != 'POST':
+        # don't do anything if remote reporting is enabled
+        return HttpResponse('')
+
     report_str = request.body.decode('utf-8')
     report_data = json.loads(report_str)
 
-    if not 'csp-report' in report_data:
-        return HttpResponse('')
+    if report_type == REPORT_TYPE_CSP:
+        handle_csp_report(report_data, session_id)
+    elif report_type == REPORT_TYPE_TRIPWIRE:
+        handle_tripwire_report(report_data, session_id)
 
-    csp_report_raw = report_data['csp-report']
-    logger.info("Received CSP report")
-    logger.info("Session ID: {}".format(session_id))
-    logger.info("Report Data: {}".format(csp_report_raw))
-
-    try:
-        session = Session.objects.get(id=session_id)
-    except Session.DoesNotExist:
-        return HttpResponse('')
-    else:
-        report = raw_report_to_model(csp_report_raw, session)
-        report.save()
-        logger.info("Report saved with id {}".format(report.id))
-    
     return HttpResponse('')
 
 @xframe_options_exempt
 def result(request, session_id):
+    if app_settings.REMOTE_REPORTING:
+        # don't do anything if remote reporting is enabled
+        return HttpResponse('')
+
     session = get_object_or_404(Session, pk=session_id)
     
     # check session creation date and wait at least RESULT_WAIT_TIME seconds before returning
@@ -57,6 +52,29 @@ def result(request, session_id):
     return render(request, 'inline_result.html', {
         'reports': reports
     })
+
+@require_POST
+@csrf_exempt
+def master_session(request, session_id):
+    if not app_settings.IS_MASTER_COLLECTOR:
+        return HttpResponse('')
+    if not app_settings.REMOTE_SECRET or len(app_settings.REMOTE_SECRET) == 0:
+        return HttpResponse('')
+    if not app_settings.REMOTE_SECRET == request.POST['secret']:
+        return HttpResponse('')
+
+    user_agent = request.POST['user_agent']
+    anonymized_ip = request.POST['anonymized_ip']
+    session = Session(
+        id=session_id,
+        user_agent=user_agent,
+        anonymized_ip=anonymized_ip
+    )
+    session.save()
+    logger.debug("created session {}".format(session.id))
+    return session.id
+
+    return HttpResponse('')
 
 @staff_member_required
 @never_cache

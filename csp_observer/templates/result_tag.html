@@ -1,9 +1,28 @@
-<div>
-    <strong>This is an inclusion_tag</strong>
+<style>
+    .analysis-result {
+        border: 1px solid rgba(0,0,0,0.2);
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 3px 3px 15px rgba(0,0,0,0.2);
+    }
+
+    #result-iframe {
+        border: 1px solid rgba(0,0,0,0.2);
+        border-radius: 5px;
+        height: 250px;
+    }
+</style>
+<script>
+    function onResultLoaded() {
+        document.getElementById('wait-notice').style.display = 'none';
+        document.getElementById('result-iframe').style.display = 'block';
+    }
+</script>
+<div class="analysis-result">
+    <strong>Analysis Preview</strong>
     <p>
         Session ID: {{request.cspo_session_id}}<br/>
-        Please wait 15 seconds for completion.<br/>
-        Your CSP Reports will appear here:
+        <span id="wait-notice">Gathering data, please wait...</span>
     </p>
-    <iframe src="{% url 'result' request.cspo_session_id %}" frameborder="0"></iframe>
+    <iframe src="{{ result_iframe_url }}" id="result-iframe" frameborder="0" width="100%" onload="onResultLoaded()" style="display: none"></iframe>
 </div>

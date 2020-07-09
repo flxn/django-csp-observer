@@ -8,6 +8,16 @@ class Session(models.Model):
     anonymized_ip = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class CspRule(models.Model):
+    """
+    Represents a rule for evaluation of csp errors or whitelisting.
+    """
+    blocked_url = models.CharField(max_length=255, blank=True, null=True)
+    effective_directive = models.CharField(max_length=255, blank=True, null=True)
+    ignore = models.BooleanField(default=False)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
 class CspReport(models.Model):
     """
     CSP Report model.
@@ -18,12 +28,12 @@ class CspReport(models.Model):
     referrer = models.CharField(max_length=255, blank=True, null=True)
     blocked_url = models.CharField(max_length=255, blank=True, null=True)
     effective_directive = models.CharField(max_length=255)
-    original_policy = models.CharField(max_length=255)
+    original_policy = models.CharField(max_length=255, blank=True, null=True)
     source_file = models.CharField(max_length=255, blank=True, null=True)
     sample = models.CharField(max_length=255, blank=True, null=True)
-    disposition = models.CharField(max_length=255)
+    disposition = models.CharField(max_length=255, blank=True, null=True)
     status_code = models.IntegerField(blank=True, null=True)
     line_number = models.IntegerField(blank=True, null=True)
     column_number = models.IntegerField(blank=True, null=True)
+    matching_rules = models.ManyToManyField(CspRule, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    

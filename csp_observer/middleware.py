@@ -1,23 +1,34 @@
 import re
 import logging
 import json
+import base64
+import uuid
+import asyncio
 from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
+from django.templatetags.static import static
+from .report_handlers import REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
+from .remote import create_master_session
 
 class CspReportMiddleware:
     def __init__(self, get_response):
-        self.get_response = get_response
+        self.super_get_response = get_response
         self.logger = logger = logging.getLogger(__name__)
 
         self.reporting_group_name = "csp-observer"
         self.csp_header_name = "Content-Security-Policy"
         if app_settings.REPORT_ONLY:
             self.csp_header_name = "Content-Security-Policy-Report-Only"
-        
-        self.csp_policies = app_settings.CSP_POLICIES
+
         # compile regexes for all enabled paths
         self.paths_regex = [re.compile("^{}$".format(p)) for p in app_settings.ENABLED_PATHS]
+
+    def get_response(self, request):
+        response = self.super_get_response(request)
+        if app_settings.IS_MASTER_COLLECTOR:
+            response = self.add_cors_header(request, response)
+        return response
 
     def anonymize_ip(self, ip_address):
         """Removes the last two octets from the ip_address"""
@@ -33,14 +44,20 @@ class CspReportMiddleware:
         self.logger.debug("session created: {}".format(session.id))
         return session.id
 
-    def add_csp_header(self, request, session_id):
+    def get_csp_policy(self, request, session_id):
         """Adds a CSP header to the response, returns the response"""
-        response = self.get_response(request)
-        report_uri = request.build_absolute_uri(reverse('report', args=(session_id, )))
+        if app_settings.REMOTE_REPORTING:
+            report_uri = "{}/report/{}/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, REPORT_TYPE_CSP, session_id)
+        else:
+            report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_CSP, session_id, )))
         # set fallback reporting directive
-        reporting_directives = [
-            "report-uri {}".format(report_uri),
-        ]
+        middleware_directives = {
+            'report-uri': [report_uri],
+        }
+
+        if app_settings.REMOTE_REPORTING:
+            middleware_directives['connect-src'] = [app_settings.REMOTE_CSP_OBSERVER_URL + "/"]
+
         # New Reporting API stuff (not working?!):
         # https://w3c.github.io/reporting/
         #response["Reporting-Endpoints"] = '{}="{}"'.format(self.reporting_group_name, report_uri)
@@ -53,13 +70,56 @@ class CspReportMiddleware:
             }]
         }
         if app_settings.ENABLE_NEW_API:
-            reporting_directives.append("report-to {}".format(self.reporting_group_name))
+            middleware_directives['report-to'] = [self.reporting_group_name]
             response["Report-To"] = json.dumps(report_to_group_definition)
 
-        # build final csp policy directive string
-        final_csp_policies = self.csp_policies + reporting_directives
-        response[self.csp_header_name] = "; ".join(final_csp_policies)
+        # merge custom csp policy from settings with required middleware directives
+        final_csp_policy = app_settings.CSP_POLICIES
+        for directive, values in middleware_directives.items():
+            if directive in final_csp_policy and directive != 'report-uri':
+                final_csp_policy[directive] = set(list(final_csp_policy[directive]) + list(values))
+            else:
+                final_csp_policy[directive] = values
+        # build csp header string
+        csp_policy_string = ""
+        for directive, values in final_csp_policy.items():
+            csp_policy_string += "{} {}; ".format(directive, " ".join(values))
 
+        return csp_policy_string
+
+    def add_csp_header(self, request, response, session_id):
+        policy = self.get_csp_policy(request, session_id)
+        response[self.csp_header_name] = policy
+        return response
+
+    def add_cors_header(self, request, response):
+        origins = ' '.join(app_settings.AUTHORIZED_REPORTERS)
+        if 'Access-Control-Allow-Origin' in response:
+            origins = response['Access-Control-Allow-Origin'] + ' ' + origins
+        response['Access-Control-Allow-Origin'] = origins
+        if 'Access-Control-Request-Headers' in request.headers:
+            response['Access-Control-Allow-Headers'] = request.headers['Access-Control-Request-Headers']
+        return response
+
+    def add_tripwire(self, request, response, session_id):
+        tripwire_js_path = static('js/tripwire.js')
+        tripwire_js_uri = request.build_absolute_uri(tripwire_js_path)
+        
+        policy = self.get_csp_policy(request, session_id)
+        policy_b64 = base64.b64encode(str.encode(policy)).decode()
+
+        if app_settings.REMOTE_REPORTING:
+            tripwire_report_uri = "{}/report/{}/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, REPORT_TYPE_TRIPWIRE, session_id)
+        else:
+            tripwire_report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_TRIPWIRE, session_id, )))
+
+        script_tag_string = '<script type="text/javascript" data-session="{}" data-policy="{}" data-report-uri="{}" src="{}"></script>'.format(
+            session_id, 
+            policy_b64, 
+            tripwire_report_uri,
+            tripwire_js_uri
+        )
+        response.content = response.content.replace(b'</body>', str.encode(script_tag_string + '</body>'))
         return response
 
     def __call__(self, request):
@@ -67,8 +127,16 @@ class CspReportMiddleware:
         for path_regex in self.paths_regex:
             if path_regex.match(request.path):
                 self.logger.debug("match for path {}".format(request.path))
-                session_id = self.create_session(request)
+                if app_settings.REMOTE_REPORTING:
+                    session_id = str(uuid.uuid4())
+                    self.logger.debug("creating remote session {}".format(session_id))
+                    asyncio.run(create_master_session(request, session_id))
+                else:
+                    session_id = self.create_session(request)
                 request.cspo_session_id = session_id
-                return self.add_csp_header(request, session_id)
+                response = self.get_response(request)
+                response = self.add_csp_header(request, response, session_id)
+                response = self.add_tripwire(request, response, session_id)
+                return response
         
         return self.get_response(request)
