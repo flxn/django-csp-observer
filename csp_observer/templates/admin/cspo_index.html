@@ -5,6 +5,8 @@
 
 {% block content %}
 
+<script type="text/javascript" src="{% static '/js/ignoreButton.js' %}"></script>
+
 <h1>Custom Admin Page</h1>
 <br>
 
@@ -17,34 +19,27 @@
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">CSP error</th>
-      <th scope="col">Short description</th>
-      <th scope="col">Long description</th>
+      <th scope="col">Blocked URL</th>
+      <th scope="col">Effective directive</th>
+      <th scope="col">Created at</th>
       <th scope="col">Ignore event</th>
     </tr>
   </thead>
   <tbody>
+  {% for post in cspreports %}
     <tr>
-      <th scope="row">1</th>
-      <td>Copy All Links Mozilla Firefox Addon</td>
-      <td>Caused by Copy All Links Mozilla Firefox Addon.</td>
-      <td></td>
-      <td><button type="button" class="btn btn-outline-danger">Ignore</button></td>
+      <th scope="row">*</th>
+      <td>{{post.blocked_url}}</td>
+      <td>{{post.effective_directive}}</td>
+      <td>{{post.created_at}}</td>
+      <td><button type="button" class="btn btn-outline-danger" onclick="IgnoreEvent('{{post.created_at}}');">Ignore</button></td>
     </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td> </td>
-      <td> </td>
-      <td> </td>
-      <td><button type="button" class="btn btn-outline-danger">Ignore</button></td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td colspan="2"> </td>
-      <td> </td>
-      <td><button type="button" class="btn btn-outline-danger">Ignore</button></td>
-    </tr>
+  {% endfor %}
   </tbody>
 </table>
 {% endblock reportTable %}
+
+
+
+
 

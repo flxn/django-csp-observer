@@ -11,6 +11,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from pprint import pprint
+from django.views import generic
 from .models import CspReport, Session
 from .report_utils import raw_report_to_model
 from . import settings as app_settings
@@ -61,3 +62,7 @@ def result(request, session_id):
 @never_cache
 def admin(request):
     return render(request, 'admin/cspo_index.html')
+
+def csprequest_list(request):
+    cspreports = CspReport.objects.all()
+    return render(request, 'admin/cspo_index.html', {'cspreports': cspreports})

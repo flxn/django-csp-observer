@@ -5,5 +5,5 @@ from . import views
 urlpatterns = [
     path('report/<uuid:session_id>/', views.report, name='report'),
     path('result/<uuid:session_id>/', views.result, name='result'),
-    path('admin/', views.admin, name='admin'),
+    path('admin/', views.csprequest_list, name='admin'),
 ]
