@@ -22,6 +22,15 @@ PolicyParser.prototype.getDirectiveForElement = function (htmlElement) {
     switch (htmlElement.tagName.toLowerCase()) {
         case 'script':
             matchingDirective = 'script-src-elem';
+            if (this.directives[matchingDirective] === undefined) {
+                matchingDirective = 'script-src'
+            }
+            break;
+        case 'style':
+            matchingDirective = 'style-src-elem';
+            if (this.directives[matchingDirective] === undefined) {
+                matchingDirective = 'style-src'
+            }
             break;
         case 'img':
             matchingDirective = 'img-src';
@@ -30,6 +39,9 @@ PolicyParser.prototype.getDirectiveForElement = function (htmlElement) {
             switch (htmlElement.getAttribute('rel')) {
                 case 'stylesheet':
                     matchingDirective = 'style-src-elem'
+                    if (this.directives[matchingDirective] === undefined) {
+                        matchingDirective = 'style-src'
+                    }
                     sourcePath = htmlElement.getAttribute('href');
                     break;
                 case 'manifest':
@@ -59,10 +71,6 @@ PolicyParser.prototype.getDirectiveForElement = function (htmlElement) {
             return null;
     }
 
-    if (!sourcePath) {
-        return null;
-    }
-
     return {
         directive: matchingDirective,
         source: sourcePath
@@ -88,11 +96,16 @@ PolicyParser.prototype.getViolation = function (htmlElement) {
         var path = directivePaths[i];
         // remove leading and trailing quotes from directive values
         path = path.replace(/^[\"\']+|[\"\']+$/g, '');
-        if (path === 'self') {
-            if (elementInfo.source[0] === '/' || elementInfo.source.indexOf(location.href) === 0) {
+        if (path.startsWith('nonce-')) {
+            var nonce = path.substr(6);
+            if (htmlElement.nonce === nonce) {
                 pathAllowed = true;
             }
-        } else if (elementInfo.source.indexOf(path) === 0) {
+        } else if (path === 'self') {
+            if (elementInfo.source && (elementInfo.source[0] === '/' || elementInfo.source.indexOf(location.href) === 0)) {
+                pathAllowed = true;
+            }
+        } else if (elementInfo.source && elementInfo.source.indexOf(path) === 0) {
             pathAllowed = true;
         } else if (path === '*') {
             pathAllowed = true;

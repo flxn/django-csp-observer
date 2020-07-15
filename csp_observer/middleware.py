@@ -4,6 +4,7 @@ import json
 import base64
 import uuid
 import asyncio
+import random
 from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
@@ -23,6 +24,13 @@ class CspReportMiddleware:
 
         # compile regexes for all enabled paths
         self.paths_regex = [re.compile("^{}$".format(p)) for p in app_settings.ENABLED_PATHS]
+
+        nonce_temp = ''
+        # generate random lower case string
+        for _ in range(10):
+            random_int = random.randint(97, 122)
+            nonce_temp += chr(random_int)
+        self.nonce = nonce_temp
 
     def get_response(self, request):
         response = self.super_get_response(request)
@@ -53,6 +61,9 @@ class CspReportMiddleware:
         # set fallback reporting directive
         middleware_directives = {
             'report-uri': [report_uri],
+            'script-src': ["'nonce-{}'".format(self.nonce)],
+            'style-src': ["'nonce-{}'".format(self.nonce)],
+            'default-src': ["'nonce-{}'".format(self.nonce)],
         }
 
         if app_settings.REMOTE_REPORTING:
@@ -69,7 +80,7 @@ class CspReportMiddleware:
                 "url": report_uri,
             }]
         }
-        if app_settings.ENABLE_NEW_API:
+        if app_settings.USE_NEW_API:
             middleware_directives['report-to'] = [self.reporting_group_name]
             response["Report-To"] = json.dumps(report_to_group_definition)
 
@@ -122,6 +133,18 @@ class CspReportMiddleware:
         response.content = response.content.replace(b'</body>', str.encode(script_tag_string + '</body>'))
         return response
 
+    def add_script_nonce(self, request, response):
+        nonce_script_tag = '<script nonce="{}"'.format(self.nonce)
+        response.content = response.content.replace(b'<script', str.encode(nonce_script_tag))
+        return response
+    
+    def add_style_nonce(self, request, response):
+        nonce_style_tag = '<style nonce="{}"'.format(self.nonce)
+        response.content = response.content.replace(b'<style', str.encode(nonce_style_tag))
+        nonce_link_tag = '<link nonce="{}"'.format(self.nonce)
+        response.content = response.content.replace(b'<link', str.encode(nonce_link_tag))
+        return response
+
     def __call__(self, request):
         # check if path in enabled paths
         for path_regex in self.paths_regex:
@@ -137,6 +160,10 @@ class CspReportMiddleware:
                 response = self.get_response(request)
                 response = self.add_csp_header(request, response, session_id)
                 response = self.add_tripwire(request, response, session_id)
+                if app_settings.USE_SCRIPT_NONCE:
+                    response = self.add_script_nonce(request, response)
+                if app_settings.USE_STYLE_NONCE:
+                    response = self.add_style_nonce(request, response)
                 return response
         
         return self.get_response(request)

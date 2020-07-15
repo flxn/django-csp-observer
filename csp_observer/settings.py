@@ -11,12 +11,16 @@ ENABLED_PATHS = ns_getattr(settings, 'ENABLED_PATHS', [
 
 CSP_POLICIES = ns_getattr(settings, 'CSP_POLICIES', {
     'default-src': ["'self'"],
-    'script-src': ["'self'", "'unsafe-inline'"],
+    'script-src': ["'self'"],
+    'style-src': ["'self'"],
     'connect-src': ["'self'"],
+    'style-src-attr': ["'unsafe-inline'"],
 })
 
-ENABLE_NEW_API = ns_getattr(settings, 'ENABLE_NEW_API', False)
+USE_NEW_API = ns_getattr(settings, 'USE_NEW_API', False)
 RESULT_WAIT_TIME = ns_getattr(settings, 'RESULT_WAIT_TIME', 10)
+USE_SCRIPT_NONCE = ns_getattr(settings, 'USE_SCRIPT_NONCE', True)
+USE_STYLE_NONCE = ns_getattr(settings, 'USE_STYLE_NONCE', True)
 
 SESSION_KEEP_DAYS = ns_getattr(settings, 'SESSION_KEEP_DAYS', 14)
 

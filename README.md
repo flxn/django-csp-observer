@@ -39,7 +39,9 @@ Overview of all available settings and their default values:
 | REPORT_ONLY | ``True`` | Wether to enforce the CSP rules or only report them. |
 | ENABLED_PATHS | ``["/"]`` | An array of paths for which the CSP header should be set. |
 | CSP_POLICIES | ``{'default-src': ["'self'"],'script-src': ["'self'", "'unsafe-inline'"],'connect-src': ["'self'"],}`` | A disctionary of CSP policies that should be applied. Key is the name of the directive and value is a list of expressions. |
-| ENABLE_NEW_API | ``False`` | Whether to enable the new Reporting API or use the old report-uri directive |
+| USE_NEW_API | ``False`` | Whether to enable the new Reporting API or use the old report-uri directive |
+| USE_SCRIPT_NONCE | ``True`` | Add nonce to all script tags to catch inline script violations |
+| USE_STYLE_NONCE | ``True`` | Add nonce to all style tags to catch inline style violations |
 | SESSION_KEEP_DAYS | ``14`` | The number of days sessions should be kept in the database. |
 | IS_MASTER_COLLECTOR | ``False`` | Indicates if the instance should function as a central collector of CSP reports for multiple other instances. |
 | AUTHORIZED_REPORTERS | ``[]`` | A list of domains that are allowed send their CSP reports to the master. Example: ``['http://127.0.0.1:8000', 'https://example.com']`` |
