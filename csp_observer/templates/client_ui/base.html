@@ -1,0 +1,35 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/clientui.css' %}">
+<script language="javascript" type="text/javascript" src="{% static 'js/clientui.js' %}"></script>
+<script language="javascript" type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        var userInterface = new CSPObserverUserInterface({
+            'sessionId': '{{ session_id }}',
+            'visibility': '{{ visibility }}'
+        });
+        userInterface.init();
+    });
+</script>
+<div id="cspo-clientui">
+    <div class="clientui-header">
+        <p class="clientui-title">Browser Extension Scan</p>
+        <button class="close" aria-label="close" @click="close">x</button>
+    </div>
+    <div class="clientui-body">
+        <div class="status">
+            <div class="icon">
+                <div class="spinner">
+                    <div class="double-bounce1"></div>
+                    <div class="double-bounce2"></div>
+                </div>
+            </div>
+            <div class="content">
+                <span class="scanning">
+                    Observing browser behavior...
+                </span>
+            </div>
+        </div>
+        <hr>
+        <p class="help">CSP Observer is securely scanning your browser's activity to detect malicious extensions.</p>
+    </div>
+</div>

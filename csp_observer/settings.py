@@ -29,3 +29,5 @@ AUTHORIZED_REPORTERS = ns_getattr(settings, 'AUTHORIZED_REPORTERS', [])
 REMOTE_SECRET = ns_getattr(settings, 'REMOTE_SECRET', '')
 REMOTE_REPORTING = ns_getattr(settings, 'REMOTE_REPORTING', False)
 REMOTE_CSP_OBSERVER_URL = ns_getattr(settings, 'REMOTE_CSP_OBSERVER_URL', "").rstrip('/')
+
+CLIENTUI_VISIBILITY = ns_getattr(settings, 'CLIENTUI_VISIBILITY', 'minimized')

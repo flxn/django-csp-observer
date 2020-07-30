@@ -8,6 +8,7 @@ import random
 from django.urls import reverse
 from . import settings as app_settings
 from .models import Session
+from django.template.loader import render_to_string
 from django.templatetags.static import static
 from .report_handlers import REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from .remote import create_master_session
@@ -145,6 +146,14 @@ class CspReportMiddleware:
         response.content = response.content.replace(b'<link', str.encode(nonce_link_tag))
         return response
 
+    def add_clientui(self, request, response, session_id):
+        clientui_html = render_to_string("client_ui/base.html", { 
+            'session_id': session_id,
+            'visibility': app_settings.CLIENTUI_VISIBILITY
+        })
+        response.content = response.content.replace(b'</body>', str.encode(clientui_html + '</body>'))
+        return response
+
     def __call__(self, request):
         # check if path in enabled paths
         for path_regex in self.paths_regex:
@@ -160,6 +169,7 @@ class CspReportMiddleware:
                 response = self.get_response(request)
                 response = self.add_csp_header(request, response, session_id)
                 response = self.add_tripwire(request, response, session_id)
+                response = self.add_clientui(request, response, session_id)
                 if app_settings.USE_SCRIPT_NONCE:
                     response = self.add_script_nonce(request, response)
                 if app_settings.USE_STYLE_NONCE:
