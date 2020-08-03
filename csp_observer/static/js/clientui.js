@@ -10,25 +10,31 @@ function CSPObserverUserInterface(options) {
         console.log("Clientui could not be initialized: No result URI passed");
         return;
     }
+    this.detailpageUri = options.detailpageUri;
+    if (!this.detailpageUri) {
+        console.log("Clientui could not be initialized: No detail URI passed");
+        return;
+    }
     this.checkTimeout = 10 * 1000;
     this.container = document.getElementById('cspo-clientui');
     this.iconSpinner = document.getElementById('cspo-icon-spinner');
     this.iconCheck = document.getElementById('cspo-icon-check');
     this.iconAlert = document.getElementById('cspo-icon-alert');
-    this.spanStatusMessage = document.getElementById('cspo-status-message');
+    this.textStatusMessage = document.getElementById('cspo-status-message');
 
     return this;
 }
 
 CSPObserverUserInterface.prototype.init = function() {
-    console.log(this.container)
     this.container.querySelector('.close').addEventListener('click', (function() {
         this.container.style.display = 'none';
     }).bind(this), false);
-
+    
     if (this.visibility === 'always') {
         this.container.classList.add('visible')
     }
+
+    this.setStatusScanning();
 
     this.container.querySelector('.spoiler').classList.add('hidden');
     this.container.addEventListener("mouseenter", (e) => { 
@@ -59,18 +65,28 @@ CSPObserverUserInterface.prototype.checkResult = function() {
     });
 }
 
+CSPObserverUserInterface.prototype.setStatusScanning = function () {
+    this.showSpinnerIcon();
+    this.textStatusMessage.textContent = "Observing browser behavior...";
+}
+
 CSPObserverUserInterface.prototype.setStatusGood = function() {
     this.showCheckIcon();
-    this.changeStatusMessage("No violations detected")
+    this.textStatusMessage.textContent = "No problems detected.";
+    setTimeout(() => {
+        this.container.style.display = 'none';
+    }, 3000)
 }
 
 CSPObserverUserInterface.prototype.setStatusWarning = function(numReports) {
+    if (this.visibility === 'minimized') {
+        this.container.classList.add('visible')
+    }
     this.showAlertIcon();
-    this.changeStatusMessage("Detected " + numReports + " problems")
-}
-
-CSPObserverUserInterface.prototype.changeStatusMessage = function(msg) {
-    this.spanStatusMessage.textContent = msg;
+    var content = "Detected " + numReports + " problems!";
+    content += '<br\><a href="' + this.detailpageUri + '" target="_blank">Click to learn more.</a>'
+    this.textStatusMessage.style.lineHeight = 'inherit';
+    this.textStatusMessage.innerHTML = content;
 }
 
 CSPObserverUserInterface.prototype.showCheckIcon = function() {

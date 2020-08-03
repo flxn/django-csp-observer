@@ -51,6 +51,16 @@ def result(request, session_id):
     serialized = serializers.serialize('json', reports)
     return HttpResponse(serialized)
 
+def result_detail(request, session_id):
+    if app_settings.REMOTE_REPORTING:
+        # don't do anything if remote reporting is enabled
+        return HttpResponse('')
+
+    session = get_object_or_404(Session, pk=session_id)
+    
+    reports = session.cspreport_set.all()
+    return render(request, 'client_ui/result_detail.html', { 'reports': reports })
+
 @require_POST
 @csrf_exempt
 def master_session(request, session_id):

@@ -6,7 +6,8 @@
         var userInterface = new CSPObserverUserInterface({
             'sessionId': '{{ session_id }}',
             'visibility': '{{ visibility }}',
-            'resultUri': '{{ result_uri}}'
+            'resultUri': '{{ result_uri}}',
+            'detailpageUri': '{{ detailpage_uri }}'
         });
         userInterface.init();
     });
@@ -27,15 +28,15 @@
                 </div>
             </div>
             <div class="content">
-                <span id="cspo-status-message">
-                    Observing browser behavior...
-                </span>
+                <p id="cspo-status-message">
+                    Clientui not initialized
+                </p>
             </div>
         </div>
         <div class="spoiler">
             <p class="help">
                 CSP Observer is passively scanning your browser's activity to detect malicious extensions.<br />
-                Your privacy is out top priority <a href="{% url 'privacy' %}" target="_blank">click here to learn about our privacy policy</a>.
+                Your privacy is our top priority <a href="{% url 'privacy' %}" target="_blank">click here to learn about our privacy policy</a>.
             </p>
         </div>
         

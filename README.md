@@ -48,3 +48,4 @@ Overview of all available settings and their default values:
 | REMOTE_SECRET | ``''`` | A shared secret that **must be the same** for the master collector and all reporters. |
 | REMOTE_REPORTING | ``False`` | Wether to use a central remote collector or not. |
 | REMOTE_CSP_OBSERVER_URL | ``''`` | The URL of the remote collector instance. Must be the path to the *csp_observer* app, as defined in *urls.py*. Example: ``http://example.com/csp`` |
+| CLIENTUI_VISIBILITY | ``always`` | Choose if the client popup should always be visible (``always``) or only if a problem has been detected (``minimized``) |

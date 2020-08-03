@@ -1,65 +1,69 @@
-
 #cspo-clientui {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    max-width: 300px;
-    background-color: #fff;
-    border: 1px solid rgba(0,0,0,0.2);
-    border-radius: 6px;
-    box-shadow: 3px 3px 15px rgba(0,0,0,0.2);
-    opacity: 0.5;
-    transition: opacity 0.15s;
-    cursor: default;
-    overflow: hidden;
-    transition: bottom 0.2s;
-}
-
-#cspo-clientui:hover {
-    opacity: 1;
-    top: inherit;
-    bottom: 10px;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  max-width: 300px;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  cursor: default;
+  overflow: hidden;
+  transition: transition 0.2s;
+  transition: margin 0.2s;
+  opacity: 0;
+  margin-bottom: -1000px;
 }
 
 #cspo-clientui.visible {
-    bottom: 10px;
+  opacity: 0.5;
+  margin-bottom: 0;
+  bottom: 10px;
+}
+
+#cspo-clientui.visible:hover {
+  opacity: 1;
+  top: inherit;
+  bottom: 10px;
 }
 
 .clientui-header {
-    background-color: #f5f5f5;
-    border-bottom: 1px solid rgba(0,0,0,0.2);
-    height: 40px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  height: 40px;
 }
 
 .clientui-header>.clientui-title {
-    line-height: 40px;
-    margin-left: 10px;
+  line-height: 40px;
+  margin-left: 10px;
 }
 
 .clientui-header>.close {
-    width: 20px;
-    height: 20px;
-    position: absolute;
-    right: 10px;
-    top: 5px;
-    outline: none;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  outline: none;
 }
 
 .clientui-body {
-    padding: 10px;
+  padding: 10px;
 }
 
 .clientui-body .status {
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .clientui-body .status .icon {
-    height: 50px;
-    width: 50px;
+  height: 50px;
+  width: 50px;
 }
 
 .clientui-body .status .icon .result-icon {
@@ -85,13 +89,19 @@
 }
 
 .clientui-body .status .content {
-    margin-left: 10px;
+  margin-left: 10px;
+}
+
+#cspo-status-message {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 50px;
 }
 
 .clientui-body .spoiler {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(0,0,0,0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: margin 0.2s;
 }
@@ -102,52 +112,50 @@
   margin-bottom: -100px;
 }
 
-#cspo-status-message {
-    font-size: 1rem;
-    line-height: 50px;
-}
-
 .help {
-    font-size: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .spinner {
-    width: 40px;
-    height: 40px;
-  
-    position: relative;
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.double-bounce1, .double-bounce2 {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #00d1b2;
+  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+  animation: sk-bounce 2.0s infinite ease-in-out;
+}
+
+.double-bounce2 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+@-webkit-keyframes sk-bounce {
+  0%, 100% {
+    -webkit-transform: scale(0.0)
   }
-  
-  .double-bounce1, .double-bounce2 {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: #00d1b2;
-    opacity: 0.6;
-    position: absolute;
-    top: 0;
-    left: 0;
-    
-    -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
-    animation: sk-bounce 2.0s infinite ease-in-out;
+  50% {
+    -webkit-transform: scale(1.0)
   }
-  
-  .double-bounce2 {
-    -webkit-animation-delay: -1.0s;
-    animation-delay: -1.0s;
+}
+
+@keyframes sk-bounce {
+  0%, 100% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
   }
-  
-  @-webkit-keyframes sk-bounce {
-    0%, 100% { -webkit-transform: scale(0.0) }
-    50% { -webkit-transform: scale(1.0) }
+  50% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
   }
-  
-  @keyframes sk-bounce {
-    0%, 100% { 
-      transform: scale(0.0);
-      -webkit-transform: scale(0.0);
-    } 50% { 
-      transform: scale(1.0);
-      -webkit-transform: scale(1.0);
-    }
-  }
+}
