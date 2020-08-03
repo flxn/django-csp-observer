@@ -147,9 +147,15 @@ class CspReportMiddleware:
         return response
 
     def add_clientui(self, request, response, session_id):
-        clientui_html = render_to_string("client_ui/base.html", { 
+        if app_settings.REMOTE_REPORTING:
+            result_uri = "{}/result/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, session_id)
+        else:
+            result_uri = request.build_absolute_uri(reverse('result', args=(session_id, )))
+
+        clientui_html = render_to_string("client_ui/popup.html", { 
             'session_id': session_id,
-            'visibility': app_settings.CLIENTUI_VISIBILITY
+            'visibility': app_settings.CLIENTUI_VISIBILITY,
+            'result_uri': result_uri
         })
         response.content = response.content.replace(b'</body>', str.encode(clientui_html + '</body>'))
         return response

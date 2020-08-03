@@ -1,7 +1,7 @@
 
 #cspo-clientui {
     position: fixed;
-    bottom: -75px;
+    bottom: 10px;
     right: 10px;
     max-width: 300px;
     background-color: #fff;
@@ -17,6 +17,7 @@
 
 #cspo-clientui:hover {
     opacity: 1;
+    top: inherit;
     bottom: 10px;
 }
 
@@ -50,6 +51,7 @@
 
 .clientui-body .status {
     width: 100%;
+    position: relative;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -60,11 +62,47 @@
     width: 50px;
 }
 
+.clientui-body .status .icon .result-icon {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: 40px;
+  width: 40px;
+  opacity: 0;
+  transition: opacity .6s;
+}
+
+.clientui-body .status .icon .result-icon.visible {
+  opacity: 1;
+}
+
+#cspo-icon-check {
+  filter: invert(65%) sepia(50%) saturate(4240%) hue-rotate(130deg) brightness(100%) contrast(101%);
+}
+
+#cspo-icon-alert {
+  filter: invert(50%) sepia(92%) saturate(5424%) hue-rotate(329deg) brightness(104%) contrast(101%);
+}
+
 .clientui-body .status .content {
     margin-left: 10px;
 }
 
-.status .content .scanning {
+.clientui-body .spoiler {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: margin 0.2s;
+}
+
+.clientui-body .spoiler.hidden {
+  margin-top: 0;
+  border-top: 0;
+  margin-bottom: -100px;
+}
+
+#cspo-status-message {
     font-size: 1rem;
     line-height: 50px;
 }
@@ -78,7 +116,6 @@
     height: 40px;
   
     position: relative;
-    margin: 5px auto;
   }
   
   .double-bounce1, .double-bounce2 {

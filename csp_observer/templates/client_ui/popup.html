@@ -5,7 +5,8 @@
     document.addEventListener("DOMContentLoaded", function(){
         var userInterface = new CSPObserverUserInterface({
             'sessionId': '{{ session_id }}',
-            'visibility': '{{ visibility }}'
+            'visibility': '{{ visibility }}',
+            'resultUri': '{{ result_uri}}'
         });
         userInterface.init();
     });
@@ -18,18 +19,25 @@
     <div class="clientui-body">
         <div class="status">
             <div class="icon">
-                <div class="spinner">
+                <img id="cspo-icon-alert" class="result-icon" src="{% static 'img/alert-circle.svg' %}" alt="Image showing a warning symbol">
+                <img id="cspo-icon-check" class="result-icon" src="{% static 'img/check-circle.svg' %}" alt="Image showing a checkmark symbol">
+                <div id="cspo-icon-spinner" class="result-icon spinner">
                     <div class="double-bounce1"></div>
                     <div class="double-bounce2"></div>
                 </div>
             </div>
             <div class="content">
-                <span class="scanning">
+                <span id="cspo-status-message">
                     Observing browser behavior...
                 </span>
             </div>
         </div>
-        <hr>
-        <p class="help">CSP Observer is securely scanning your browser's activity to detect malicious extensions.</p>
+        <div class="spoiler">
+            <p class="help">
+                CSP Observer is passively scanning your browser's activity to detect malicious extensions.<br />
+                Your privacy is out top priority <a href="{% url 'privacy' %}" target="_blank">click here to learn about our privacy policy</a>.
+            </p>
+        </div>
+        
     </div>
 </div>

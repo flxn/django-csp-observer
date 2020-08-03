@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
-from pprint import pprint
 from django.views import generic
+from django.core import serializers
 from .models import CspReport, Session
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
@@ -34,7 +34,6 @@ def report(request, report_type, session_id):
 
     return HttpResponse('')
 
-@xframe_options_exempt
 def result(request, session_id):
     if app_settings.REMOTE_REPORTING:
         # don't do anything if remote reporting is enabled
@@ -49,9 +48,8 @@ def result(request, session_id):
         time.sleep((min_return_time - current_time).seconds) 
 
     reports = session.cspreport_set.all()
-    return render(request, 'inline_result.html', {
-        'reports': reports
-    })
+    serialized = serializers.serialize('json', reports)
+    return HttpResponse(serialized)
 
 @require_POST
 @csrf_exempt
@@ -84,3 +82,6 @@ def admin(request):
 def csprequest_list(request):
     cspreports = CspReport.objects.all()
     return render(request, 'admin/cspo_index.html', {'cspreports': cspreports})
+
+def privacy(request):
+    return render(request, 'client_ui/privacy.html')
