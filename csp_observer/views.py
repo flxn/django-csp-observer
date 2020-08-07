@@ -15,6 +15,8 @@ from django.core import serializers
 from .models import CspReport, Session
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
+from django.core.paginator import Paginator
+from django.views.generic import ListView
 
 logger = logging.getLogger(__name__)
 
@@ -87,11 +89,20 @@ def master_session(request, session_id):
 @staff_member_required
 @never_cache
 def admin(request):
-    return render(request, 'admin/cspo_index.html')
+    context = {
+        'csprequests' : CspReport.objects.all()
+    }
+    return render(request, 'admin/cspo_index.html', context)
 
-def csprequest_list(request):
-    cspreports = CspReport.objects.all()
-    return render(request, 'admin/cspo_index.html', {'cspreports': cspreports})
+class CspRequestList(ListView):
+    model = CspReport
+    template_name = 'admin/cspo_index.html'
+    context_object_name = 'csprequests'
+    paginate_by = 2
+
+    def get_queryset(self):
+        return CspReport.objects.all()
+
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')

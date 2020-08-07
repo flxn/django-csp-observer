@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import CspRequestList
 from . import views
 
 urlpatterns = [
@@ -7,5 +8,5 @@ urlpatterns = [
     path('resultdetail/<uuid:session_id>', views.result_detail, name='result_detail'),
     path('master/session/<uuid:session_id>', views.master_session, name='master_session'),
     path('privacy/', views.privacy, name='privacy'),
-    path('admin/', views.csprequest_list, name='admin'),
+    path('admin/', CspRequestList.as_view(), name='admin'),
 ]
