@@ -12,7 +12,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from django.views import generic
 from django.core import serializers
-from .models import CspReport, Session
+from .models import CspReport, Session, CspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
 from django.core.paginator import Paginator
@@ -89,20 +89,18 @@ def master_session(request, session_id):
 @staff_member_required
 @never_cache
 def admin(request):
-    context = {
-        'csprequests' : CspReport.objects.all()
-    }
-    return render(request, 'admin/cspo_index.html', context)
+    cspreports = CspReport.objects.all()
+    paginator1 = Paginator(cspreports, 2) # Show 25 contacts per page.
 
-class CspRequestList(ListView):
-    model = CspReport
-    template_name = 'admin/cspo_index.html'
-    context_object_name = 'csprequests'
-    paginate_by = 2
+    csprules = CspReport.objects.all() # This should be changed to rules, but I have reports for testing purposes
+    paginator2 = Paginator(csprules, 3)
 
-    def get_queryset(self):
-        return CspReport.objects.all()
+    page_number1 = request.GET.get('page')
+    page_obj1 = paginator1.get_page(page_number1)
 
+    page_number2 = request.GET.get('page2')
+    page_obj2 = paginator2.get_page(page_number2)
+    return render(request, 'admin/cspo_index.html', {'cspreports': page_obj1, 'csprules':page_obj2})
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')
