@@ -31,7 +31,15 @@
           <td>{{post.blocked_url}}</td>
           <td>{{post.effective_directive}}</td>
           <td>{{post.created_at}}</td>
-          <td><button type="button" class="btn btn-outline-danger" onclick="IgnoreEvent('{{post.created_at}}');">Ignore</button></td>
+          <td>
+            <form method="POST">
+                <input style ="display:none" id="blocked_url" type="text" name="blocked_url" value="{{ post.blocked_url }}">
+                <input style ="display:none" id="title" type="text" name="title" value="title">
+                <input style ="display:none" id="description" type="text" name="description" value="description">
+                <input style ="display:none" id="effective_directive" type="text" name="effective_directive" value="{{ post.effective_directive }}">
+                <input type="submit" class="btn btn-outline-danger" value="Ignore" name="mybtn"/>
+            </form>
+          </td>
         </tr>
     {% endfor %}
     </tbody>
@@ -79,8 +87,8 @@
           <th scope="row">*</th>
           <td>{{post.blocked_url}}</td>
           <td>{{post.effective_directive}}</td>
-          <td>{{post.created_at}}</td>
-          <td><button type="button" class="btn btn-outline-danger" onclick="IgnoreEvent('{{post.created_at}}');">Ignore</button></td>
+          <td>{{post.title}}</td>
+          <td>{{post.description}}</td>
         </tr>
     {% endfor %}
     </tbody>
@@ -109,8 +117,5 @@
       </nav>
   {% endif %}
 {% endblock rulesTable %}
-
-
-
 
 

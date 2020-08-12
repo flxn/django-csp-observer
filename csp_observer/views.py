@@ -14,9 +14,11 @@ from django.views import generic
 from django.core import serializers
 from .models import CspReport, Session, CspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
+from .rule_handlers import handle_csp_rule
 from . import settings as app_settings
 from django.core.paginator import Paginator
 from django.views.generic import ListView
+from django import forms
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,7 @@ def result_detail(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     
     reports = session.cspreport_set.all()
-    return render(request, 'client_ui/result_detail.html', { 'reports': reports })
+    return render(request, 'client_ui/result_detail.html', {'reports': reports })
 
 @require_POST
 @csrf_exempt
@@ -86,13 +88,20 @@ def master_session(request, session_id):
 
     return HttpResponse('')
 
+
+class CspRuleForm(forms.ModelForm):
+    class Meta:
+        model = CspRule
+        fields = ['title', 'blocked_url', 'description', 'effective_directive']
+
 @staff_member_required
 @never_cache
+@csrf_exempt
 def admin(request):
     cspreports = CspReport.objects.all()
-    paginator1 = Paginator(cspreports, 2) # Show 25 contacts per page.
+    paginator1 = Paginator(cspreports, 2)
 
-    csprules = CspReport.objects.all() # This should be changed to rules, but I have reports for testing purposes
+    csprules = CspRule.objects.all() # This should be changed to rules, but I have reports for testing purposes
     paginator2 = Paginator(csprules, 3)
 
     page_number1 = request.GET.get('page')
@@ -100,6 +109,13 @@ def admin(request):
 
     page_number2 = request.GET.get('page2')
     page_obj2 = paginator2.get_page(page_number2)
+
+    if request.method == 'POST':
+        form = CspRuleForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+
+            return render(request, 'admin/cspo_index.html', {'cspreports': page_obj1, 'csprules':page_obj2})
     return render(request, 'admin/cspo_index.html', {'cspreports': page_obj1, 'csprules':page_obj2})
 
 def privacy(request):
