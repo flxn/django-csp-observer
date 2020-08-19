@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .update import update_rules
 
 urlpatterns = [
     path('report/<str:report_type>/<uuid:session_id>', views.report, name='report'),
@@ -9,3 +10,9 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('admin/', views.admin, name='admin'),
 ]
+
+# the following code is only executed once on start
+try :
+    update_rules()
+except Exception:
+    pass

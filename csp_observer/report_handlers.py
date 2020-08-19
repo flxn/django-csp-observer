@@ -54,7 +54,7 @@ def handle_csp_report(report_data, session_id):
         evaluator = CspRuleEvaluator()
         matching_rules, ignore = evaluator.evaluate_report(report)
         if not ignore:
-            report.save()    
+            report.save()
             report.matching_rules.add(*matching_rules)
             logger.info("Report saved with id {}".format(report.id))
         else:
@@ -73,7 +73,7 @@ def handle_tripwire_report(report_data, session_id):
     for violation in report_data:
         # check if violation should be ignored
         evaluator = CspRuleEvaluator()
-        _, ignore = evaluator.evaluate_directive(violation['source'], violation['directive'])
+        matching_rules, ignore = evaluator.evaluate_directive(violation['source'], violation['directive'])
         if ignore:
             continue
         
@@ -96,4 +96,5 @@ def handle_tripwire_report(report_data, session_id):
             new_report.document_url = violation['document']
             new_report.disposition = REPORT_TYPE_TRIPWIRE
             new_report.save()
+            new_report.matching_rules.add(*matching_rules)
             logger.info("Report saved with id {}".format(new_report.id))

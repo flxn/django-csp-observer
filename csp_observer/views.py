@@ -14,7 +14,6 @@ from django.views import generic
 from django.core import serializers
 from .models import CspReport, Session, CspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
-from .rule_handlers import handle_csp_rule
 from . import settings as app_settings
 from django.core.paginator import Paginator
 from django.views.generic import ListView

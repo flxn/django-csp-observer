@@ -31,3 +31,5 @@ REMOTE_REPORTING = ns_getattr(settings, 'REMOTE_REPORTING', False)
 REMOTE_CSP_OBSERVER_URL = ns_getattr(settings, 'REMOTE_CSP_OBSERVER_URL', "").rstrip('/')
 
 CLIENTUI_VISIBILITY = ns_getattr(settings, 'CLIENTUI_VISIBILITY', 'always')
+
+RULE_UPDATE_FILE = ns_getattr(settings, 'RULE_UPDATE_FILE', 'https://raw.githubusercontent.com/flxn/csp-observer-data/master/rules.json')

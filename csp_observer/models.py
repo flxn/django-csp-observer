@@ -12,11 +12,25 @@ class CspRule(models.Model):
     """
     Represents a rule for evaluation of csp errors or whitelisting.
     """
+    CAUSES = (
+        ('extension', 'Browser Extension'),
+        ('browser', 'Web Browser'),
+        ('malware', 'Malware'),
+        ('other', 'Other'),
+    )
+
     blocked_url = models.CharField(max_length=255, blank=True, null=True)
     effective_directive = models.CharField(max_length=255, blank=True, null=True)
     ignore = models.BooleanField(default=False)
     title = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    cause = models.CharField(max_length=255, choices=CAUSES, default='other')
+
+class GlobalCspRule(CspRule):
+    """
+    Represents a non-custom rule from the remote rule database
+    """
+    global_id = models.CharField(max_length=255)
 
 class CspReport(models.Model):
     """
@@ -37,3 +51,12 @@ class CspReport(models.Model):
     column_number = models.IntegerField(blank=True, null=True)
     matching_rules = models.ManyToManyField(CspRule, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class StoredConfig(models.Model):
+    """
+    Generic model for storing key/value pairs.
+    """
+    LAST_RULE_UPDATE = 'LAST_RULE_UPDATE'
+
+    key = models.TextField()
+    value = models.TextField()
