@@ -9,4 +9,5 @@ urlpatterns = [
     path('master/session/<uuid:session_id>', views.master_session, name='master_session'),
     path('privacy/', views.privacy, name='privacy'),
     path('admin/', views.admin, name='admin'),
+    path('admin/update/rules/', views.admin_update_rules, name='admin_update_rules'),
 ]

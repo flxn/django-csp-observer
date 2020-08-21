@@ -2,7 +2,6 @@ import time
 from django.core.management.base import BaseCommand, CommandError
 from csp_observer import settings as app_settings
 from csp_observer.update import update_rules
-from csp_observer.models import StoredConfig
 
 class Command(BaseCommand):
     help = 'Updates global rules from central repository'

@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -15,6 +15,7 @@ from django.core import serializers
 from .models import CspReport, Session, CspRule, GlobalCspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
+from .update import update_rules
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django import forms
@@ -136,6 +137,22 @@ def admin(request):
             'last_updated': last_rule_update
         }
     })
+
+@require_POST
+def admin_update_rules(request):
+    try:
+        count_pre, new_rules, count_post = update_rules(force=True)
+        return JsonResponse({
+            'status': 'ok',
+            'count_pre': count_pre,
+            'new_rules': new_rules,
+            'count_post': count_post
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')

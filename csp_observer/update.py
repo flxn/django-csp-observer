@@ -12,10 +12,10 @@ def retrieve_rule_data():
     return data
 
 def update_rules(force=False):
-    if not force:
-        last_update = app_settings.get_stored(app_settings.KEY_LAST_RULE_UPDATE, default=None)
-        last_update = float(last_update if last_update else 0)
+    last_update = app_settings.get_stored(app_settings.KEY_LAST_RULE_UPDATE, default=None)
+    last_update = float(last_update if last_update else 0)
 
+    if not force:
         time_since_update = time.time() - last_update
         if time_since_update < app_settings.RULE_UPDATE_INTERVAL:
             raise Exception('Already updated within last {} hours'.format(app_settings.RULE_UPDATE_INTERVAL / 60 / 60))
