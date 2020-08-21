@@ -40,7 +40,7 @@ RULE_UPDATE_INTERVAL = ns_getattr(settings, 'RULE_UPDATE_INTERVAL', 60 * 60 * 6)
 # Database-stored config values
 #
 
-LAST_RULE_UPDATE = 'LAST_RULE_UPDATE'
+KEY_LAST_RULE_UPDATE = 'LAST_RULE_UPDATE'
 
 def get_all_stored():
     return StoredConfig.objects.all()
@@ -49,7 +49,7 @@ def delete_all_stored():
     StoredConfig.objects.all().delete()
 
 def put_stored(key, value):
-    obj, created = StoredConfig.objects.get_or_create(key=key, value=value)
+    obj, created = StoredConfig.objects.get_or_create(key=str(key), value=str(value))
     if not created:
         obj.value = value
         obj.save()
@@ -57,6 +57,8 @@ def put_stored(key, value):
 def get_stored(key, default=None):
     try:
         obj = StoredConfig.objects.get(key=key)
-        return obj.value
     except StoredConfig.DoesNotExist:
         return default
+    else:
+        print(obj.value)
+        return str(obj.value)

@@ -61,7 +61,7 @@
         <div class="card">
           <div class="card-header">Active Settings</div>
           <div class="card-body">
-            <p>For more info about the different settings and how to change them view the README</p>
+            <p>For more info about the different settings and how to change them <a href="https://github.com/flxn/django-csp-observer" target="_blank">view the README</a></p>
             {% block settingsTable %}
               <p>Settings Table...</p>
             {% endblock settingsTable %}
@@ -70,6 +70,26 @@
       </div>
   
       <div class="col">
+        
+        <div class="row">
+
+          <div class="card" style="width:100%">
+            <div class="card-header">Rule Database</div>
+            <div class="card-body">
+              <p class="card-title">
+                Entries: <strong>{{global_rules.count}}</strong><br/>
+                Last Updated: <strong>{{global_rules.last_updated}}</strong>
+              </p>
+              <br>
+              <div>
+                {% block globalRulesTable %}
+                  <p>Rules Table...</p>
+                {% endblock globalRulesTable %}
+              </div>
+            </div>
+          </div>
+        </div>
+    
         <div class="row">
           <div class="card" style="width:100%">
             <div class="card-header">Diagram One</div>

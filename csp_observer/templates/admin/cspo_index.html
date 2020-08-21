@@ -7,13 +7,13 @@
 
 <script type="text/javascript" src="{% static 'csp_observer/js/ignoreButton.js' %}"></script>
 
-<h1>Custom Admin Page</h1>
+<h1>CSP Observer Admin Panel</h1>
 <br>
 
 {% endblock content %}
 
 {% block reportTable %}
-  <h3>Reports Table</h3>
+  <h3>Incoming Reports</h3>
   <table class="table table-hover">
     <thead>
       <tr>
@@ -70,7 +70,7 @@
 {% endblock reportTable %}
 
 {% block rulesTable %}
-  <h3>Rules Table</h3>
+  <h3>Custom Rules</h3>
   <table class="table table-hover">
     <thead>
       <tr>
@@ -138,3 +138,46 @@
 {% endblock settingsTable %}
 
 
+{% block globalRulesTable %}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Title</th>
+        <th scope="col">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for rule in global_rules.pagination %}
+        <tr>
+          <th scope="row"><a href="https://github.com/flxn/csp-observer-data/blob/master/rules/{{rule.global_id}}.md" target="_blank">{{rule.global_id}}</a></th>
+          <td>{{rule.title}}</td>
+          <td>{{rule.description}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  {% if global_rules.pagination %}
+
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          {% if global_rules.pagination.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{cspreports.number}}&page2={{ global_rules.pagination.previous_page_number }}">&laquo</a></li>
+          {% endif %}
+
+          {% for num in global_rules.pagination.paginator.page_range %}
+            {% if global_rules.pagination.number == num %}
+              <li class="page-item active"><a class="page-link" href="?page1={{cspreports.number}}&page2={{ num }}">{{ num }}</a></li>
+            {% elif num > global_rules.pagination.number|add:'-3' and num < global_rules.pagination.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{cspreports.number}}&page2={{ num }}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if global_rules.pagination.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{cspreports.number}}&page2={{ global_rules.pagination.next_page_number }}">&raquo</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+  {% endif %}
+{% endblock globalRulesTable %}

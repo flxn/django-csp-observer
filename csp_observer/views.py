@@ -12,7 +12,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from django.views import generic
 from django.core import serializers
-from .models import CspReport, Session, CspRule
+from .models import CspReport, Session, CspRule, GlobalCspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
 from django.core.paginator import Paginator
@@ -97,11 +97,14 @@ class CspRuleForm(forms.ModelForm):
 @never_cache
 @csrf_exempt
 def admin(request):
-    cspreports = CspReport.objects.all()
-    paginator1 = Paginator(cspreports, 2)
+    cspreports = CspReport.objects.all().order_by('-created_at')
+    paginator1 = Paginator(cspreports, 5)
 
-    csprules = CspRule.objects.all() # This should be changed to rules, but I have reports for testing purposes
-    paginator2 = Paginator(csprules, 3)
+    csprules = CspRule.objects.all().filter(globalcsprule=None).order_by('title') # This should be changed to rules, but I have reports for testing purposes
+    paginator2 = Paginator(csprules, 5)
+    
+    global_database_rules = GlobalCspRule.objects.values('global_id', 'title', 'description').distinct().order_by('title')
+    global_rules_paginator = Paginator(global_database_rules, 5)
 
     page_number1 = request.GET.get('page')
     page_obj1 = paginator1.get_page(page_number1)
@@ -109,8 +112,14 @@ def admin(request):
     page_number2 = request.GET.get('page2')
     page_obj2 = paginator2.get_page(page_number2)
 
-    settings_keys = [item for item in dir(app_settings) if not item.startswith("__")]
+    global_rules_page = request.GET.get('global_rules_page')
+    global_rules_page_obj = global_rules_paginator.get_page(global_rules_page)
+
+    settings_keys = [item for item in dir(app_settings) if (not item.startswith("__") and item.isupper())]
     settings_list = [(key, getattr(app_settings, key)) for key in settings_keys]
+
+    last_rule_update = app_settings.get_stored(app_settings.KEY_LAST_RULE_UPDATE, default=None)
+    last_rule_update = datetime.fromtimestamp(float(last_rule_update if last_rule_update else 0))
 
     if request.method == 'POST':
         form = CspRuleForm(request.POST)
@@ -120,8 +129,13 @@ def admin(request):
     return render(request, 'admin/cspo_index.html', {
         'cspreports': page_obj1, 
         'csprules': page_obj2, 
-        'settings': settings_list}
-    )
+        'settings': settings_list,
+        'global_rules': {
+            'pagination': global_rules_page_obj,
+            'count': global_database_rules.count(),
+            'last_updated': last_rule_update
+        }
+    })
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')

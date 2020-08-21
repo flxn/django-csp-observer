@@ -10,9 +10,3 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('admin/', views.admin, name='admin'),
 ]
-
-# the following code is only executed once on start
-try :
-    update_rules()
-except Exception:
-    pass
