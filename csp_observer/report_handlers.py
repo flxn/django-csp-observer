@@ -37,6 +37,7 @@ def raw_csp_report_to_model(raw_data, session):
     return report
 
 def handle_csp_report(report_data, session_id):
+    """Process incoming CSP reports"""
     if not 'csp-report' in report_data:
         return
 
@@ -61,6 +62,7 @@ def handle_csp_report(report_data, session_id):
             logger.info("Report will be ignored")
     
 def handle_tripwire_report(report_data, session_id):
+    """Process incoming Tripwire reports"""
     logger.info("Received Tripwire report")
     reports = []
     try:

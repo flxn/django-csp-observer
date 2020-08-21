@@ -109,13 +109,19 @@ def admin(request):
     page_number2 = request.GET.get('page2')
     page_obj2 = paginator2.get_page(page_number2)
 
+    settings_keys = [item for item in dir(app_settings) if not item.startswith("__")]
+    settings_list = [(key, getattr(app_settings, key)) for key in settings_keys]
+
     if request.method == 'POST':
         form = CspRuleForm(request.POST)
         if form.is_valid():
             form.save(commit=True)
 
-            return render(request, 'admin/cspo_index.html', {'cspreports': page_obj1, 'csprules':page_obj2})
-    return render(request, 'admin/cspo_index.html', {'cspreports': page_obj1, 'csprules':page_obj2})
+    return render(request, 'admin/cspo_index.html', {
+        'cspreports': page_obj1, 
+        'csprules': page_obj2, 
+        'settings': settings_list}
+    )
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')

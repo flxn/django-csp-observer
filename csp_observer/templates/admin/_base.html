@@ -8,14 +8,14 @@
 <title>CSP Observer Admin - {% block title %}Base{% endblock title %}</title>
 <meta name="description" content="A framework for launching new Django projects quickly.">
 <meta name="author" content="">
-<link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+<link rel="shortcut icon" type="image/x-icon" href="{% static 'csp_observer/img/favicon.ico' %}">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
 
 {% block css %}
 <!-- Bootstrap CSS -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'csp_observer/css/base.css' %}">
 {% endblock %}
 </head>
 
@@ -31,53 +31,84 @@
     </div>
   </main>
 
-  <div class="offset-md-1 col-md-10">
-    {% block content %}
-      <p>Default content...</p>
-    {% endblock content %}
-  </div>
-
-  <div class ="offset-md-1 col-md-10">
-    {% block reportTable %}
-      <p>Report Table...</p>
-    {% endblock reportTable %}
-  </div>
-
-  <div class ="offset-md-1 col-md-10" style="margin-top:60px;">
-    {% block rulesTable %}
-      <p>Rules Table...</p>
-    {% endblock rulesTable %}
-  </div>
-
-  <br>
-  <br>
-  <div class="row offset-md-1" style="padding-bottom:50px;">
-
-    <div class="card" style="width: 35rem">
-      <div class="card-header">Diagram One</div>
-      <div class="card-body">
-        <h5 class="card-title">Diagram of something</h5>
-        <br>
-        <div>
-          <canvas id="diagramOne" style="max-width: 500px;"></canvas>
-        </div>
+  <div id="cspo-main-container" class="container">
+    <div class="row">
+      <div class="col-md-12">
+        {% block content %}
+          <p>Default content...</p>
+        {% endblock content %}
       </div>
     </div>
-
-    <div class="card offset-md-1" style="width: 35rem">
-      <div class="card-header">Diagram Two</div>
-      <div class="card-body">
-        <h5 class="card-title">Another diagram</h5>
-        <br>
-        <div>
-          <canvas id="diagramTwo" style="max-width: 500px;"></canvas>
-        </div>
+    
+    <div class="row">
+      <div class ="col-md-12">
+        {% block reportTable %}
+          <p>Report Table...</p>
+        {% endblock reportTable %}
       </div>
     </div>
-
+    
+    <div class="row">
+      <div class ="col-md-12" style="margin-top:60px;">
+        {% block rulesTable %}
+          <p>Rules Table...</p>
+        {% endblock rulesTable %}
+      </div>
+    </div>
+    
+    <div class="row mt-5">
+      <div class="col">
+        <div class="card">
+          <div class="card-header">Active Settings</div>
+          <div class="card-body">
+            <p>For more info about the different settings and how to change them view the README</p>
+            {% block settingsTable %}
+              <p>Settings Table...</p>
+            {% endblock settingsTable %}
+          </div>
+        </div>
+      </div>
+  
+      <div class="col">
+        <div class="row">
+          <div class="card" style="width:100%">
+            <div class="card-header">Diagram One</div>
+            <div class="card-body">
+              <h5 class="card-title">Diagram of something</h5>
+              <br>
+              <div>
+                <canvas id="diagramOne" class="mx-auto" style="max-width: 500px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="card" style="width:100%">
+            <div class="card-header">Diagram Two</div>
+            <div class="card-body">
+              <h5 class="card-title">Another diagram</h5>
+              <br>
+              <div>
+                <canvas id="diagramTwo" class="mx-auto" style="max-width: 500px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+      
+    <br>
+    <br>
+    <div class="row offset-md-1" style="padding-bottom:50px;">
+  
+    </div>
   </div>
+  
 
-  <script src="{% static '/js/pieCharts.js' %}"></script>
+  <script src="{% static 'csp_observer/js/pieCharts.js' %}"></script>
 
   <footer class="footer">
     <div class="container">
@@ -96,7 +127,7 @@
   <!-- 3rd party JavaScript -->
 
   <!-- Project JS -->
-  <script src="{% static 'js/base.js' %}"></script>
+  <script src="{% static 'csp_observer/js/base.js' %}"></script>
 
   {% endblock javascript %}
 

@@ -1,6 +1,6 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/clientui.css' %}">
-<script language="javascript" type="text/javascript" src="{% static 'js/clientui.js' %}"></script>
+<link rel="stylesheet" href="{% static 'csp_observer/css/clientui.css' %}">
+<script language="javascript" type="text/javascript" src="{% static 'csp_observer/js/clientui.js' %}"></script>
 <script language="javascript" type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(){
         var userInterface = new CSPObserverUserInterface({
@@ -20,8 +20,8 @@
     <div class="clientui-body">
         <div class="status">
             <div class="icon">
-                <img id="cspo-icon-alert" class="result-icon" src="{% static 'img/alert-circle.svg' %}" alt="Image showing a warning symbol">
-                <img id="cspo-icon-check" class="result-icon" src="{% static 'img/check-circle.svg' %}" alt="Image showing a checkmark symbol">
+                <img id="cspo-icon-alert" class="result-icon" src="{% static 'csp_observer/img/alert-circle.svg' %}" alt="Image showing a warning symbol">
+                <img id="cspo-icon-check" class="result-icon" src="{% static 'csp_observer/img/check-circle.svg' %}" alt="Image showing a checkmark symbol">
                 <div id="cspo-icon-spinner" class="result-icon spinner">
                     <div class="double-bounce1"></div>
                     <div class="double-bounce2"></div>

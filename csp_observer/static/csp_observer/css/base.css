@@ -1,0 +1,6 @@
+@media (min-width: 1000px) {
+    #cspo-main-container {
+        width: 90%;
+        max-width: 1500px;
+    }
+}

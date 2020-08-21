@@ -8,6 +8,9 @@ class Session(models.Model):
     anonymized_ip = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "{}@{}".format(self.id, self.created_at)
+
 class CspRule(models.Model):
     """
     Represents a rule for evaluation of csp errors or whitelisting.
@@ -26,11 +29,17 @@ class CspRule(models.Model):
     description = models.TextField(blank=True, null=True)
     cause = models.CharField(max_length=255, choices=CAUSES, default='other')
 
+    def __str__(self):
+        return "{} ({}) {}".format(self.title, self.blocked_url, "[Ignore]" if self.ignore else "")
+
 class GlobalCspRule(CspRule):
     """
     Represents a non-custom rule from the remote rule database
     """
     global_id = models.CharField(max_length=255)
+
+    def __str__(self):
+        return "{}".format(self.global_id)
 
 class CspReport(models.Model):
     """
@@ -52,11 +61,15 @@ class CspReport(models.Model):
     matching_rules = models.ManyToManyField(CspRule, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "{}@{}".format(self.blocked_url, self.session)
+
 class StoredConfig(models.Model):
     """
     Generic model for storing key/value pairs.
     """
-    LAST_RULE_UPDATE = 'LAST_RULE_UPDATE'
+    key = models.TextField(unique=True)
+    value = models.TextField(blank=True, null=True)
 
-    key = models.TextField()
-    value = models.TextField()
+    def __str__(self):
+        return "{}={}".format(self.key, self.value)

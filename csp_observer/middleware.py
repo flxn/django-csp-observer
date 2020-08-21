@@ -114,7 +114,7 @@ class CspReportMiddleware:
         return response
 
     def add_tripwire(self, request, response, session_id):
-        tripwire_js_path = static('js/tripwire.js')
+        tripwire_js_path = static('csp_observer/js/tripwire.js')
         tripwire_js_uri = request.build_absolute_uri(tripwire_js_path)
         
         policy = self.get_csp_policy(request, session_id)

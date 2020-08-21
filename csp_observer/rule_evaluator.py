@@ -15,6 +15,7 @@ class CspRuleEvaluator(object):
         ignore = False
         for rule in self.rules:
             if rule.blocked_url == url:
+                # url matches, now check directive if rule requires matching directive
                 if rule.effective_directive == None or rule.effective_directive.replace('-elem', '') == directive.replace('-elem', ''):
                     matching_rules.append(rule)
                     if rule.ignore:

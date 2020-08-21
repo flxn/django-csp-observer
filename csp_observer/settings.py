@@ -1,4 +1,5 @@
 from django.conf import settings
+from .models import StoredConfig
 
 NAMESPACE = getattr(settings, 'CSP_OBSERVER_NAMESPACE' , 'CSPO')
 def ns_getattr(object, name, default=None):
@@ -33,3 +34,29 @@ REMOTE_CSP_OBSERVER_URL = ns_getattr(settings, 'REMOTE_CSP_OBSERVER_URL', "").rs
 CLIENTUI_VISIBILITY = ns_getattr(settings, 'CLIENTUI_VISIBILITY', 'always')
 
 RULE_UPDATE_FILE = ns_getattr(settings, 'RULE_UPDATE_FILE', 'https://raw.githubusercontent.com/flxn/csp-observer-data/master/rules.json')
+RULE_UPDATE_INTERVAL = ns_getattr(settings, 'RULE_UPDATE_INTERVAL', 60 * 60 * 6) # in seconds
+
+#
+# Database-stored config values
+#
+
+LAST_RULE_UPDATE = 'LAST_RULE_UPDATE'
+
+def get_all_stored():
+    return StoredConfig.objects.all()
+
+def delete_all_stored():
+    StoredConfig.objects.all().delete()
+
+def put_stored(key, value):
+    obj, created = StoredConfig.objects.get_or_create(key=key, value=value)
+    if not created:
+        obj.value = value
+        obj.save()
+
+def get_stored(key, default=None):
+    try:
+        obj = StoredConfig.objects.get(key=key)
+        return obj.value
+    except StoredConfig.DoesNotExist:
+        return default

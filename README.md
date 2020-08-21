@@ -29,6 +29,7 @@ List of commands integrated into *manage.py*:
 | Command | Description |
 | ------- | ----------- |
 | `cleansessions` | Removes old sessions and reports from the database. Should be run regularly. |
+| `updaterules` | Updates the rules from the central rule repository. |
 
 ## Configuration
 
