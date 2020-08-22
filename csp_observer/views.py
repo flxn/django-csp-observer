@@ -12,7 +12,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from django.views import generic
 from django.core import serializers
-from .models import CspReport, Session, CspRule, GlobalCspRule
+from .models import CspReport, Session, CspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
 from .update import update_rules
@@ -61,9 +61,14 @@ def result_detail(request, session_id):
         return HttpResponse('')
 
     session = get_object_or_404(Session, pk=session_id)
-    
     reports = session.cspreport_set.all()
-    return render(request, 'client_ui/result_detail.html', {'reports': reports })
+    rules = {}
+    for report in reports:
+        for rule in report.matching_rules.get_global():
+            if not rule.global_id in rules:
+                rules[rule.global_id] = rule
+
+    return render(request, 'client_ui/result_detail.html', {'rules': rules, 'reports': reports })
 
 @require_POST
 @csrf_exempt
@@ -92,7 +97,7 @@ def master_session(request, session_id):
 class CspRuleForm(forms.ModelForm):
     class Meta:
         model = CspRule
-        fields = ['title', 'blocked_url', 'description', 'effective_directive']
+        fields = ['title', 'blocked_url', 'short_description', 'effective_directive']
 
 @staff_member_required
 @never_cache
@@ -101,10 +106,10 @@ def admin(request):
     cspreports = CspReport.objects.all().order_by('-created_at')
     paginator1 = Paginator(cspreports, 5)
 
-    csprules = CspRule.objects.all().filter(globalcsprule=None).order_by('title') # This should be changed to rules, but I have reports for testing purposes
+    csprules = CspRule.objects.get_custom().order_by('title') # This should be changed to rules, but I have reports for testing purposes
     paginator2 = Paginator(csprules, 5)
     
-    global_database_rules = GlobalCspRule.objects.values('global_id', 'title', 'description').distinct().order_by('title')
+    global_database_rules = CspRule.objects.get_global().values('global_id', 'title', 'short_description').distinct().order_by('title')
     global_rules_paginator = Paginator(global_database_rules, 5)
 
     page_number1 = request.GET.get('page')
@@ -127,7 +132,7 @@ def admin(request):
         if form.is_valid():
             form.save(commit=True)
 
-    return render(request, 'admin/cspo_index.html', {
+    return render(request, 'admin/dashboard.html', {
         'cspreports': page_obj1, 
         'csprules': page_obj2, 
         'settings': settings_list,
@@ -144,6 +149,7 @@ def admin_update_rules(request):
         count_pre, new_rules, count_post = update_rules(force=True)
         return JsonResponse({
             'status': 'ok',
+            'message': 'Database Updated Successfully.',
             'count_pre': count_pre,
             'new_rules': new_rules,
             'count_post': count_post

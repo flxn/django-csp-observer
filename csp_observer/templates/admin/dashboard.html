@@ -1,0 +1,261 @@
+{% extends 'cspo_base.html' %}
+{% load static %}
+
+{% block title %}Index{% endblock title %}
+
+{% block content %}
+
+<div id="cspo-main-container" class="container">
+  <h1>Admin Dashboard</h1>
+
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <h3>Incoming Reports</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Blocked URL</th>
+            <th scope="col">Effective directive</th>
+            <th scope="col">Created at</th>
+            <th scope="col">Ignore event</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in cspreports %}
+          <tr>
+            <td>{{post.blocked_url}}</td>
+            <td>{{post.effective_directive}}</td>
+            <td>{{post.created_at}}</td>
+            <td>
+              <form method="POST">
+                <input style="display:none" id="blocked_url" type="text" name="blocked_url"
+                  value="{{ post.blocked_url }}">
+                <input style="display:none" id="title" type="text" name="title" value="title">
+                <input style="display:none" id="short_description" type="text" name="short_description" value="short_description">
+                <input style="display:none" id="effective_directive" type="text" name="effective_directive"
+                  value="{{ post.effective_directive }}">
+                <input type="submit" class="btn btn-outline-danger" value="Ignore" name="mybtn" />
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% if cspreports %}
+
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          {% if cspreports.has_previous %}
+          <li class="page-item"><a class="page-link"
+              href="?page={{ cspreports.previous_page_number }}&page2={{csprules.number}}">&laquo</a></li>
+          {% endif %}
+
+          {% for num in cspreports.paginator.page_range %}
+          {% if cspreports.number == num %}
+          <li class="page-item active"><a class="page-link"
+              href="?page={{ num }}&page2={{csprules.number}}">{{ num }}</a></li>
+          {% elif num > cspreports.number|add:'-3' and num < cspreports.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}&page2={{csprules.number}}">{{ num }}</a></li>
+          {% endif %}
+          {% endfor %}
+
+          {% if cspreports.has_next %}
+          <li class="page-item"><a class="page-link"
+              href="?page={{ cspreports.next_page_number }}&page2={{csprules.number}}">&raquo</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12 mt-5">
+      <h3>Custom Rules</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Blocked URL</th>
+            <th scope="col">Effective directive</th>
+            <th scope="col">Title</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in csprules %}
+          <tr>
+            <td>{{post.blocked_url}}</td>
+            <td>{{post.effective_directive}}</td>
+            <td>{{post.title}}</td>
+            <td>{{post.short_description}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% if csprules %}
+
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          {% if csprules.has_previous %}
+          <li class="page-item"><a class="page-link"
+              href="?page={{cspreports.number}}&page2={{ csprules.previous_page_number }}">&laquo</a></li>
+          {% endif %}
+
+          {% for num in csprules.paginator.page_range %}
+          {% if csprules.number == num %}
+          <li class="page-item active"><a class="page-link"
+              href="?page1={{cspreports.number}}&page2={{ num }}">{{ num }}</a></li>
+          {% elif num > csprules.number|add:'-3' and num < csprules.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?page={{cspreports.number}}&page2={{ num }}">{{ num }}</a>
+          </li>
+          {% endif %}
+          {% endfor %}
+
+          {% if csprules.has_next %}
+          <li class="page-item"><a class="page-link"
+              href="?page={{cspreports.number}}&page2={{ csprules.next_page_number }}">&raquo</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">Active Settings</div>
+        <div class="card-body">
+          <p>For more info about the different settings and how to change them <a
+              href="https://github.com/flxn/django-csp-observer" target="_blank">view the README</a></p>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Current Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for key, val in settings %}
+              <tr>
+                <td>{{key}}</td>
+                <td><code>{{val}}</code></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+
+      <div class="row">
+        <div class="card" style="width:100%">
+          <div class="card-header">Rule Database</div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <p class="card-title">
+                  Entries: <strong>{{global_rules.count}}</strong><br />
+                  Last Updated: <strong>{{global_rules.last_updated}}</strong>
+                </p>
+              </div>
+              <div class="col">
+                <button onclick="checkRuleUpdate()" type="button" class="btn btn-primary float-right"
+                  role="button">Check For Update</button>
+              </div>
+            </div>
+            <div id="rule-update-response" class="alert" role="alert" style="display: none;"></div>
+
+
+            <br>
+            <div>
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for rule in global_rules.pagination %}
+                  <tr>
+                    <th scope="row"><a
+                        href="https://github.com/flxn/csp-observer-data/blob/master/rules/{{rule.global_id}}.md"
+                        target="_blank">{{rule.global_id}}</a></th>
+                    <td>{{rule.title}}</td>
+                    <td>{{rule.short_description}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              {% if global_rules.pagination %}
+
+              <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                  {% if global_rules.pagination.has_previous %}
+                  <li class="page-item"><a class="page-link"
+                      href="?page={{cspreports.number}}&page2={{ global_rules.pagination.previous_page_number }}">&laquo</a>
+                  </li>
+                  {% endif %}
+
+                  {% for num in global_rules.pagination.paginator.page_range %}
+                  {% if global_rules.pagination.number == num %}
+                  <li class="page-item active"><a class="page-link"
+                      href="?page1={{cspreports.number}}&page2={{ num }}">{{ num }}</a></li>
+                  {% elif num > global_rules.pagination.number|add:'-3' and num < global_rules.pagination.number|add:'3' %}
+                  <li class="page-item"><a class="page-link"
+                      href="?page={{cspreports.number}}&page2={{ num }}">{{ num }}</a></li>
+                  {% endif %}
+                  {% endfor %}
+
+                  {% if global_rules.pagination.has_next %}
+                  <li class="page-item"><a class="page-link"
+                      href="?page={{cspreports.number}}&page2={{ global_rules.pagination.next_page_number }}">&raquo</a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </nav>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="card" style="width:100%">
+          <div class="card-header">Diagram One</div>
+          <div class="card-body">
+            <h5 class="card-title">Diagram of something</h5>
+            <br>
+            <div>
+              <canvas id="diagramOne" class="mx-auto" style="max-width: 500px;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="card" style="width:100%">
+          <div class="card-header">Diagram Two</div>
+          <div class="card-body">
+            <h5 class="card-title">Another diagram</h5>
+            <br>
+            <div>
+              <canvas id="diagramTwo" class="mx-auto" style="max-width: 500px;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock content %}

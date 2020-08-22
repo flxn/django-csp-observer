@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<title>CSP Observer Admin - {% block title %}Base{% endblock title %}</title>
+<meta name="description" content="A framework for launching new Django projects quickly.">
+<meta name="author" content="">
+<link rel="shortcut icon" type="image/x-icon" href="{% static 'csp_observer/img/favicon.ico' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+{% block css %}
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="{% static 'csp_observer/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'csp_observer/css/Chart.min.css' %}">
+<link rel="stylesheet" href="{% static 'csp_observer/css/base.css' %}">
+{% endblock %}
+
+{% csrf_token %}
+<script>
+window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+</script>
+</head>
+
+<body>
+  <main role="main">
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+      <h5 class="my-0 mr-md-auto font-weight-normal">
+        <a href="#">CSP Observer</a>
+      </h5>
+      <nav class="my-2 my-md-0 mr-md-3">
+
+      </nav>
+    </div>
+  </main>
+
+  {% block content %}
+
+  {% endblock content %}
+
+  <footer class="footer mt-5">
+    <p class="text-muted text-center">
+      <a href="https://github.com/flxn/django-csp-observer" target="_blank">django-csp-observer</a> | The source code is licensed MIT.
+    </p>
+  </footer>
+
+
+  {% block javascript %}
+  <!-- Bootstrap JavaScript -->
+  <script src="{% static 'csp_observer/js/jquery.min.js' %}"></script>
+  <script src="{% static 'csp_observer/js/bootstrap.min.js' %}"></script>
+
+  <!-- 3rd party JavaScript -->
+  <script src="{% static 'csp_observer/js/Chart.min.js' %}"></script>
+
+  <!-- Project JS -->
+  <script src="{% static 'csp_observer/js/base.js' %}"></script>
+  <script src="{% static 'csp_observer/js/pieCharts.js' %}"></script>
+  <script type="text/javascript" src="{% static 'csp_observer/js/ignoreButton.js' %}"></script>
+
+  {% endblock javascript %}
+
+</body>
+</html>

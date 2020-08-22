@@ -18,7 +18,7 @@ function checkRuleUpdate() {
             responseDiv.removeClass('alert-info');
             if (data.status === 'ok') {
                 responseDiv.addClass('alert-success');
-                responseDiv.text("Database Updated Successfully. Reloading Page...");
+                responseDiv.text(data.message + " Reloading Page...");
                 responseDiv.show();
                 setTimeout(function() {
                     location.reload();

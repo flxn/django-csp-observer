@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from .managers import CspRuleManager
 
 class Session(models.Model):
     """Session model"""
@@ -22,24 +23,19 @@ class CspRule(models.Model):
         ('other', 'Other'),
     )
 
+    global_id = models.CharField(max_length=255, blank=True, null=True)
     blocked_url = models.CharField(max_length=255, blank=True, null=True)
     effective_directive = models.CharField(max_length=255, blank=True, null=True)
     ignore = models.BooleanField(default=False)
     title = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    short_description = models.TextField(blank=True, null=True)
+    long_description = models.TextField(blank=True, null=True)
     cause = models.CharField(max_length=255, choices=CAUSES, default='other')
 
-    def __str__(self):
-        return "{} ({}) {}".format(self.title, self.blocked_url, "[Ignore]" if self.ignore else "")
-
-class GlobalCspRule(CspRule):
-    """
-    Represents a non-custom rule from the remote rule database
-    """
-    global_id = models.CharField(max_length=255)
+    objects = CspRuleManager()
 
     def __str__(self):
-        return "{}".format(self.global_id)
+        return "{} {} ({}) {}".format(self.global_id if self.global_id else "", self.title, self.blocked_url, "[Ignore]" if self.ignore else "")
 
 class CspReport(models.Model):
     """

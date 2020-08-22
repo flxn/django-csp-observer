@@ -2,7 +2,7 @@ import urllib.request
 import json
 import time
 from . import settings as app_settings
-from .models import GlobalCspRule
+from .models import CspRule
 
 def retrieve_rule_data():
     data = []
@@ -25,7 +25,7 @@ def update_rules(force=False):
         raise Exception('Local database already on latest version')
     
     # perform a little sanity check
-    current_global_rule_count = GlobalCspRule.objects.all().count()
+    current_global_rule_count = CspRule.objects.get_global().count()
     allowed_difference = 0.5
     if len(rule_database['rules']) < current_global_rule_count * allowed_difference:
         # check failed
@@ -33,15 +33,16 @@ def update_rules(force=False):
         raise Exception('Sanity Check Failed. Too few global rules.')
 
     # delete all stored rules
-    GlobalCspRule.objects.all().delete()
+    CspRule.objects.get_global().delete()
 
     rule_directive_counter = 0
     for rule in rule_database['rules']:
         for directive in rule['directives']:
-            db_rule = GlobalCspRule(
+            db_rule = CspRule(
                 global_id=rule['id'],
                 title=rule['title'],
-                description=rule['description'],
+                short_description=rule['short_description'],
+                long_description=rule['long_description'],
                 cause=rule['cause'],
                 blocked_url=directive['url'],
                 effective_directive=directive['directive'] if directive['directive'] != '' else None

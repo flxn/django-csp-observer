@@ -14,6 +14,9 @@ setup(
    author_email='mail@flxn.de',
    packages=['csp_observer'],
    python_requires='>=3.6',
+   install_requires=[
+        'markdown',
+    ],
    classifiers=[
       "Development Status :: 1 - Planning",
       "Programming Language :: Python :: 3",

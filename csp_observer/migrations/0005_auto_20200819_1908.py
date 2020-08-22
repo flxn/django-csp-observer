@@ -11,14 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='GlobalCspRule',
-            fields=[
-                ('csprule_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='csp_observer.CspRule')),
-                ('global_id', models.CharField(max_length=255)),
-            ],
-            bases=('csp_observer.csprule',),
-        ),
         migrations.RemoveField(
             model_name='csprule',
             name='is_custom_rule',

@@ -49,10 +49,9 @@ def delete_all_stored():
     StoredConfig.objects.all().delete()
 
 def put_stored(key, value):
-    obj, created = StoredConfig.objects.get_or_create(key=str(key), value=str(value))
-    if not created:
-        obj.value = value
-        obj.save()
+    obj, created = StoredConfig.objects.get_or_create(key=str(key))
+    obj.value = value
+    obj.save()
 
 def get_stored(key, default=None):
     try:

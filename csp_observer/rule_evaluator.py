@@ -1,11 +1,9 @@
-from .models import CspRule, GlobalCspRule
+from .models import CspRule
 
 class CspRuleEvaluator(object):
 
     def __init__(self):
-        custom_rules = list(CspRule.objects.all())
-        global_rules = list(GlobalCspRule.objects.all())
-        self.rules = custom_rules + global_rules
+        self.rules = list(CspRule.objects.all())
     
     def evaluate_directive(self, url, directive):
         """Evaluates a url and directive against all rules.
