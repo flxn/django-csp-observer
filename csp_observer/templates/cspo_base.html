@@ -28,7 +28,8 @@ window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   <main role="main">
     <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
       <h5 class="my-0 mr-md-auto font-weight-normal">
-        <a href="#">CSP Observer</a>
+        <img width="40" src="{% static 'csp_observer/img/cspo-logo-64px.png' %}" alt="The CSP Observer Logo: A small telescope with the letter CSP above it.">
+        <a class="ml-2" href="{{ header_link|default:'#' }}">CSP Observer</a>
       </h5>
       <nav class="my-2 my-md-0 mr-md-3">
 

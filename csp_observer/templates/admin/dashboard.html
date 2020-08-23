@@ -11,9 +11,11 @@
   <div class="row mt-4">
     <div class="col-md-12">
       <div class="card">
-        <div class="card-header"><h5>Incoming Reports</h5></div>
+        <div class="card-header">
+          <h5>Incoming Reports</h5>
+        </div>
         <div class="card-body">
-          <table class="table table-hover">
+          <table class="table table-sm table-hover">
             <thead>
               <tr>
                 <th scope="col">Blocked URL</th>
@@ -33,10 +35,11 @@
                     <input style="display:none" id="blocked_url" type="text" name="blocked_url"
                       value="{{ post.blocked_url }}">
                     <input style="display:none" id="title" type="text" name="title" value="title">
-                    <input style="display:none" id="short_description" type="text" name="short_description" value="short_description">
+                    <input style="display:none" id="short_description" type="text" name="short_description"
+                      value="short_description">
                     <input style="display:none" id="effective_directive" type="text" name="effective_directive"
                       value="{{ post.effective_directive }}">
-                    <input type="submit" class="btn btn-outline-danger" value="Ignore" name="mybtn" />
+                    <input type="submit" class="btn btn-sm btn-outline-danger" value="Ignore" name="mybtn" />
                   </form>
                 </td>
               </tr>
@@ -58,7 +61,8 @@
               <li class="page-item active"><a class="page-link"
                   href="?page={{ num }}&page2={{csprules.number}}">{{ num }}</a></li>
               {% elif num > cspreports.number|add:'-3' and num < cspreports.number|add:'3' %}
-              <li class="page-item"><a class="page-link" href="?page={{ num }}&page2={{csprules.number}}">{{ num }}</a></li>
+              <li class="page-item"><a class="page-link" href="?page={{ num }}&page2={{csprules.number}}">{{ num }}</a>
+              </li>
               {% endif %}
               {% endfor %}
 
@@ -77,9 +81,11 @@
   <div class="row">
     <div class="col-md-12 mt-4">
       <div class="card">
-        <div class="card-header"><h5>Custom Rules</h5></div>
+        <div class="card-header">
+          <h5>Custom Rules</h5>
+        </div>
         <div class="card-body">
-          <table class="table table-hover">
+          <table class="table table-sm table-hover">
             <thead>
               <tr>
                 <th scope="col">Blocked URL</th>
@@ -114,7 +120,8 @@
               <li class="page-item active"><a class="page-link"
                   href="?page1={{cspreports.number}}&page2={{ num }}">{{ num }}</a></li>
               {% elif num > csprules.number|add:'-3' and num < csprules.number|add:'3' %}
-              <li class="page-item"><a class="page-link" href="?page={{cspreports.number}}&page2={{ num }}">{{ num }}</a>
+              <li class="page-item"><a class="page-link"
+                  href="?page={{cspreports.number}}&page2={{ num }}">{{ num }}</a>
               </li>
               {% endif %}
               {% endfor %}
@@ -127,7 +134,7 @@
           </nav>
           {% endif %}
         </div>
-      </div>  
+      </div>
     </div>
   </div>
 
@@ -239,7 +246,7 @@
         <div class="card" style="width:100%">
           <div class="card-header">Observed issues within the last 14 days</div>
           <div class="card-body">
-                <canvas id="diagramRuleDistribution" class="mx-auto"></canvas>
+            <canvas id="diagramRuleDistribution" class="mx-auto"></canvas>
           </div>
         </div>
       </div>
@@ -261,8 +268,8 @@
 </div>
 
 <script>
-  $(function() {
-    $.get('{% url "chart_observed_rule_distribution" %}', function(data) {
+  $(function () {
+    $.get('{% url "chart_observed_rule_distribution" %}', function (data) {
       new Chart($('#diagramRuleDistribution').get(0).getContext('2d'), {
         type: 'pie',
         data: data,
@@ -272,9 +279,9 @@
             position: 'right'
           }
         }
-      })  
+      })
     });
-    $.get('{% url "chart_reports_per_day" %}', function(data) {
+    $.get('{% url "chart_reports_per_day" %}', function (data) {
       new Chart($('#diagramReportsPerDay').get(0).getContext('2d'), {
         type: 'line',
         data: data,
@@ -284,7 +291,7 @@
             position: 'bottom'
           }
         }
-      })  
+      })
     });
   })
 </script>
