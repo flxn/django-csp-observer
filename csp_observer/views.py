@@ -167,6 +167,20 @@ def admin_update_rules(request):
             'message': str(e)
         })
 
+@require_POST
+def delete_custom_rule(request, rule_id):
+    try:
+        num_deleted, _ = CspRule.objects.get(id=rule_id).delete()
+        return JsonResponse({
+            'status': 'ok',
+            'message': 'Rule {} has been removed from the database.'.format(rule_id)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
 def privacy(request):
     return render(request, 'client_ui/privacy.html')
 

@@ -92,15 +92,19 @@
                 <th scope="col">Effective directive</th>
                 <th scope="col">Title</th>
                 <th scope="col">Description</th>
+                <th scope="col">Delete Rule</th>
               </tr>
             </thead>
             <tbody>
-              {% for post in csprules %}
+              {% for rule in csprules %}
               <tr>
-                <td>{{post.blocked_url}}</td>
-                <td>{{post.effective_directive}}</td>
-                <td>{{post.title}}</td>
-                <td>{{post.short_description}}</td>
+                <td>{{rule.blocked_url}}</td>
+                <td>{{rule.effective_directive}}</td>
+                <td>{{rule.title}}</td>
+                <td>{{rule.short_description}}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-danger" name="mybtn" onclick="deleteCustomRule('{{rule.id}}')">[!] Delete</button>
+                </td>
               </tr>
               {% endfor %}
             </tbody>

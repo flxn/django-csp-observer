@@ -10,6 +10,7 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('admin/', views.admin, name='admin'),
     path('admin/update/rules/', views.admin_update_rules, name='admin_update_rules'),
+    path('admin/rule/<int:rule_id>/delete', views.delete_custom_rule, name='delete_custom_rule'),
     path('chart/observed_rule_distribution', views.chart_observed_rule_distribution, name='chart_observed_rule_distribution'),
     path('chart/reports_per_day', views.chart_reports_per_day, name='chart_reports_per_day'),
 ]

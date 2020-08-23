@@ -31,3 +31,24 @@ function checkRuleUpdate() {
         }
     })
 }
+
+function deleteCustomRule(ruleId) {
+    var apiPostUrl = getBaseUrl() + 'rule/' + ruleId + '/delete';
+    var responseDiv = $('#rule-update-response');
+    $.ajax({
+        url: apiPostUrl,
+        type: 'post',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        success: function(data) {
+            responseDiv.removeClass('alert-info');
+            if (data.status === 'ok') {
+                alert(data.message)
+            } else {
+                alert("An error occurred deleting rule " + ruleId + ":\n\n" + data.message)
+            }
+            location.reload();
+        }
+    })
+}
