@@ -109,11 +109,16 @@
 .clientui-body .spoiler.hidden {
   margin-top: 0;
   border-top: 0;
-  margin-bottom: -100px;
+  margin-bottom: -120px;
 }
 
 .help {
   font-size: 0.75rem;
+}
+
+#cspo-icon {
+  float: left;
+  margin-right: 5px;
 }
 
 .spinner {

@@ -6,8 +6,9 @@
 
 {% block content %}
 <div class="container">
+    <img id="cspo-icon" src="{% static 'csp_observer/img/cspo-logo-256px.png' %}" alt="The CSP Observer Logo: A small telescope with the letter CSP above it.">
     <h1>Scan Report</h1>
-    <h3>We have detected {{rules | length}} possible issues with your web browser.</h2>
+    <h3>We have detected {{rules|length }} possible issue{{rules|length|pluralize}} with your web browser.</h2>
     {% for rule in rules.values %}
     <div class="card mt-5">
         <div class="card-header">
@@ -23,8 +24,15 @@
                     <div class="card-header" id="heading{{rule.global_id}}">
                     <h2 class="mb-0">
                         <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{rule.global_id}}" aria-expanded="true" aria-controls="collapse{{rule.global_id}}">
-                        View More
+                            <svg class="if-collapsed" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                            <svg class="if-not-collapsed" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                            View details about this detection
                         </button>
+                        
                     </h2>
                     </div>
                 

@@ -4,3 +4,16 @@
         max-width: 1500px;
     }
 }
+
+#cspo-icon {
+    height: 100px;
+    float: left;
+    margin-right: 20px;
+}
+
+[data-toggle="collapse"].collapsed .if-not-collapsed {
+    display: none;
+}
+[data-toggle="collapse"]:not(.collapsed) .if-collapsed {
+    display: none;
+}

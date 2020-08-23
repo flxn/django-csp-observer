@@ -83,7 +83,8 @@ CSPObserverUserInterface.prototype.setStatusWarning = function(numReports) {
         this.container.classList.add('visible')
     }
     this.showAlertIcon();
-    var content = "Detected " + numReports + " problems!";
+    var problems = numReports === 1 ? 'problem' : 'problems';
+    var content = "Detected " + numReports + " " + problems + "!";
     content += '<br\><a href="' + this.detailpageUri + '" target="_blank">Click to learn more.</a>'
     this.textStatusMessage.style.lineHeight = 'inherit';
     this.textStatusMessage.innerHTML = content;
