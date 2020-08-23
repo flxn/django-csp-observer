@@ -9,7 +9,7 @@
 <meta name="description" content="A framework for launching new Django projects quickly.">
 <meta name="author" content="">
 <link rel="shortcut icon" type="image/x-icon" href="{% static 'csp_observer/img/favicon.ico' %}">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+<script src="{% static 'csp_observer/js/jquery.min.js' %}"></script>
 
 {% block css %}
 <!-- Bootstrap CSS -->
@@ -49,15 +49,14 @@ window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
   {% block javascript %}
   <!-- Bootstrap JavaScript -->
-  <script src="{% static 'csp_observer/js/jquery.min.js' %}"></script>
   <script src="{% static 'csp_observer/js/bootstrap.min.js' %}"></script>
 
   <!-- 3rd party JavaScript -->
   <script src="{% static 'csp_observer/js/Chart.min.js' %}"></script>
+  <script src="{% static 'csp_observer/js/chartjs-plugin-colorschemes.min.js' %}"></script>
 
   <!-- Project JS -->
   <script src="{% static 'csp_observer/js/base.js' %}"></script>
-  <script src="{% static 'csp_observer/js/pieCharts.js' %}"></script>
   <script type="text/javascript" src="{% static 'csp_observer/js/ignoreButton.js' %}"></script>
 
   {% endblock javascript %}

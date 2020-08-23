@@ -229,25 +229,19 @@
 
       <div class="row mt-3">
         <div class="card" style="width:100%">
-          <div class="card-header">Diagram One</div>
+          <div class="card-header">Observed issues within the last 14 days</div>
           <div class="card-body">
-            <h5 class="card-title">Diagram of something</h5>
-            <br>
-            <div>
-              <canvas id="diagramOne" class="mx-auto" style="max-width: 500px;"></canvas>
-            </div>
+                <canvas id="diagramRuleDistribution" class="mx-auto"></canvas>
           </div>
         </div>
       </div>
 
       <div class="row mt-3">
         <div class="card" style="width:100%">
-          <div class="card-header">Diagram Two</div>
+          <div class="card-header">Observed reports per day over the last 14 days</div>
           <div class="card-body">
-            <h5 class="card-title">Another diagram</h5>
-            <br>
             <div>
-              <canvas id="diagramTwo" class="mx-auto" style="max-width: 500px;"></canvas>
+              <canvas id="diagramReportsPerDay" class="mx-auto"></canvas>
             </div>
           </div>
         </div>
@@ -257,5 +251,34 @@
   </div>
 
 </div>
+
+<script>
+  $(function() {
+    $.get('{% url "chart_observed_rule_distribution" %}', function(data) {
+      new Chart($('#diagramRuleDistribution').get(0).getContext('2d'), {
+        type: 'pie',
+        data: data,
+        options: {
+          responsive: true,
+          legend: {
+            position: 'right'
+          }
+        }
+      })  
+    });
+    $.get('{% url "chart_reports_per_day" %}', function(data) {
+      new Chart($('#diagramReportsPerDay').get(0).getContext('2d'), {
+        type: 'line',
+        data: data,
+        options: {
+          responsive: true,
+          legend: {
+            position: 'bottom'
+          }
+        }
+      })  
+    });
+  })
+</script>
 
 {% endblock content %}

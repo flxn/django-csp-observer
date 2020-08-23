@@ -20,6 +20,7 @@ from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django import forms
 from django.forms.models import model_to_dict
+from django.db.models import Count
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +147,7 @@ def admin(request):
             'pagination': global_rules_page_obj,
             'count': global_database_rules.count(),
             'last_updated': last_rule_update
-        }
+        },
     })
 
 @require_POST
@@ -168,3 +169,45 @@ def admin_update_rules(request):
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')
+
+#
+# Charts
+#
+
+def chart_observed_rule_distribution(request):
+    counts = {}
+    first_relevant_date = timezone.now() - timedelta(days=14)
+    reports = CspReport.objects.filter(created_at__gt=first_relevant_date)
+
+    for report in reports:
+        raw_data = report.matching_rules.values('global_id', 'title').annotate(observed_count=Count('global_id'))
+        for val in raw_data:
+            label = "{} ({})".format(val['title'], val['global_id'])
+            if not label in counts:
+                counts[label] = 0
+            counts[label] += val['observed_count']
+    
+    chart_data = {
+        'labels': [x for x in counts.keys()],
+        'datasets': [{
+            'data': [x for x in counts.values()],
+        }]
+    }
+
+    return JsonResponse(chart_data)
+
+def chart_reports_per_day(request):
+    counts = {}
+    first_relevant_date = timezone.now() - timedelta(days=14)
+    reports = CspReport.objects.filter(created_at__gt=first_relevant_date).extra(select={'day': 'date( created_at )'}).values('day') \
+               .annotate(count=Count('created_at'))
+
+    chart_data = {
+        'labels': [x['day'] for x in reports],
+        'datasets': [{
+            'label': 'Reports Per Day',
+            'data': [x['count'] for x in reports],
+        }]
+    }
+
+    return JsonResponse(chart_data)

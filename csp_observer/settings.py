@@ -59,5 +59,4 @@ def get_stored(key, default=None):
     except StoredConfig.DoesNotExist:
         return default
     else:
-        print(obj.value)
         return str(obj.value)
