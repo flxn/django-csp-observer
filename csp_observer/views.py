@@ -19,6 +19,7 @@ from .update import update_rules
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django import forms
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +53,13 @@ def result(request, session_id):
         time.sleep((min_return_time - current_time).seconds) 
 
     reports = session.cspreport_set.all()
-    serialized = serializers.serialize('json', reports)
-    return HttpResponse(serialized)
+    rules = {}
+    for report in reports:
+        for rule in report.matching_rules.get_global():
+            if not rule.global_id in rules:
+                rules[rule.global_id] = model_to_dict(rule)
+    
+    return JsonResponse(list(rules.values()), safe=False)
 
 def result_detail(request, session_id):
     if app_settings.REMOTE_REPORTING:
