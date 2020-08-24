@@ -36,6 +36,8 @@ CLIENTUI_VISIBILITY = ns_getattr(settings, 'CLIENTUI_VISIBILITY', 'always')
 RULE_UPDATE_FILE = ns_getattr(settings, 'RULE_UPDATE_FILE', 'https://raw.githubusercontent.com/flxn/csp-observer-data/master/rules.json')
 RULE_UPDATE_INTERVAL = ns_getattr(settings, 'RULE_UPDATE_INTERVAL', 60 * 60 * 6) # in seconds
 
+VOLUNTARY_DATA_SHARING_URL = 'https://csp-observer-reports.flxn.de'
+
 #
 # Database-stored config values
 #

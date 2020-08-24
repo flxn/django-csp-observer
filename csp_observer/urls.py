@@ -7,6 +7,7 @@ urlpatterns = [
     path('result/<uuid:session_id>', views.result, name='result'),
     path('resultdetail/<uuid:session_id>', views.result_detail, name='result_detail'),
     path('master/session/<uuid:session_id>', views.master_session, name='master_session'),
+    path('session/<uuid:session_id>/share', views.share_session, name='share_session'),
     path('privacy/', views.privacy, name='privacy'),
     path('admin/', views.admin, name='admin'),
     path('admin/update/rules/', views.admin_update_rules, name='admin_update_rules'),

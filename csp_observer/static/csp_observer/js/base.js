@@ -34,7 +34,29 @@ function checkRuleUpdate() {
 
 function deleteCustomRule(ruleId) {
     var apiPostUrl = getBaseUrl() + 'rule/' + ruleId + '/delete';
-    var responseDiv = $('#rule-update-response');
+    $.ajax({
+        url: apiPostUrl,
+        type: 'post',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        success: function(data) {
+            if (data.status === 'ok') {
+                alert(data.message)
+            } else {
+                alert("An error occurred deleting rule " + ruleId + ":\n\n" + data.message)
+            }
+            location.reload();
+        }
+    })
+}
+
+function shareSessionData(sessionId) {
+    var apiPostUrl = shareSessionUrl;
+    var responseDiv = $('#share-data-response');
+    responseDiv.addClass('alert-info');
+    responseDiv.text("Submitting data...");
+    responseDiv.show();
     $.ajax({
         url: apiPostUrl,
         type: 'post',
@@ -44,11 +66,14 @@ function deleteCustomRule(ruleId) {
         success: function(data) {
             responseDiv.removeClass('alert-info');
             if (data.status === 'ok') {
-                alert(data.message)
+                responseDiv.addClass('alert-success');
+                responseDiv.text(data.message);
+                responseDiv.show();
             } else {
-                alert("An error occurred deleting rule " + ruleId + ":\n\n" + data.message)
+                responseDiv.addClass('alert-warning');
+                responseDiv.text(data.message);
+                responseDiv.show();
             }
-            location.reload();
         }
     })
 }

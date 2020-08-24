@@ -16,6 +16,7 @@ from .models import CspReport, Session, CspRule
 from .report_handlers import handle_csp_report, handle_tripwire_report, REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from . import settings as app_settings
 from .update import update_rules
+from .remote import share_session_data
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django import forms
@@ -74,8 +75,19 @@ def result_detail(request, session_id):
         for rule in report.matching_rules.get_global():
             if not rule.global_id in rules:
                 rules[rule.global_id] = rule
+    reports_without_match = [model_to_dict(x) for x in reports.filter(matching_rules=None)]
 
-    return render(request, 'client_ui/result_detail.html', {'rules': rules, 'reports': reports })
+    shared_data = {
+        'session': model_to_dict(session),
+        'unknown_reports': reports_without_match
+    }
+
+    return render(request, 'client_ui/result_detail.html', {
+        'rules': rules, 
+        'other_reports': reports_without_match,
+        'session': session,
+        'shared_data': shared_data
+    })
 
 @require_POST
 @csrf_exempt
@@ -180,6 +192,31 @@ def delete_custom_rule(request, rule_id):
             'status': 'error',
             'message': str(e)
         })
+
+@require_POST
+def share_session(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    reports_without_match = [model_to_dict(x) for x in session.cspreport_set.filter(matching_rules=None)]
+
+    shared_data = {
+        'session': model_to_dict(session),
+        'unknown_reports': reports_without_match
+    }
+
+    try:
+        status, response = share_session_data(session_id, shared_data)
+        if status >= 200 and status < 300:
+            return JsonResponse({
+                'status': 'ok',
+                'message': 'The data has been submitted. Thank you!'
+            })
+    except Exception as e:
+        pass
+
+    return JsonResponse({
+        'status': 'error',
+        'message': 'There was an error communicating with the sharing service.'
+    })
 
 def privacy(request):
     return render(request, 'client_ui/privacy.html')

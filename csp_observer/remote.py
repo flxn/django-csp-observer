@@ -22,3 +22,13 @@ async def create_master_session(request, session_id):
             print(status, res_data)
     except urllib.request.URLError as e:
         print(e)
+
+def share_session_data(session_id, data):
+    """Transmits the shared session data to the reporting endpoint"""
+    data = urllib.parse.urlencode(data)
+    req = urllib.request.Request(app_settings.VOLUNTARY_DATA_SHARING_URL, data)
+    with urllib.request.urlopen(req) as response:
+        status = response.status
+        res_data = response.read()
+        return (status, res_data)
+
