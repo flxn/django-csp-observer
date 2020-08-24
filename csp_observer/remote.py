@@ -1,7 +1,17 @@
 
 import urllib.parse
 import urllib.request
+import json
 from . import settings as app_settings
+from uuid import UUID
+
+class UUIDEncoder(json.JSONEncoder):
+    """https://stackoverflow.com/a/48159596"""
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            # if the obj is uuid, we simply return the value of uuid
+            return obj.hex
+        return json.JSONEncoder.default(self, obj)
 
 async def create_master_session(request, session_id):
     """Creates a remote session on the master collector instance and returns status."""
@@ -25,7 +35,7 @@ async def create_master_session(request, session_id):
 
 def share_session_data(session_id, data):
     """Transmits the shared session data to the voluntary reporting endpoint."""
-    data = urllib.parse.urlencode(data)
+    data = json.dumps(data, cls=UUIDEncoder).encode('ascii')
     req = urllib.request.Request(app_settings.VOLUNTARY_DATA_SHARING_URL, data)
     with urllib.request.urlopen(req) as response:
         status = response.status

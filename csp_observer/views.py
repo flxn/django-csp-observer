@@ -219,6 +219,7 @@ def share_session(request, session_id):
                 'message': 'The data has been submitted. Thank you!'
             })
     except Exception as e:
+        print(e)
         pass
 
     return JsonResponse({
