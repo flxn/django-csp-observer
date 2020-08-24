@@ -1,6 +1,7 @@
 from django.db import models
 
 class CspRuleManager(models.Manager):
+    """Django model manager for convenient query of global and custom rules."""
     def get_global(self):
         return super().get_queryset().exclude(global_id=None)
 

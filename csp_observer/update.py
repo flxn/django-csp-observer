@@ -5,6 +5,7 @@ from . import settings as app_settings
 from .models import CspRule
 
 def retrieve_rule_data():
+    """Returns the data of the global rule.json from the global data repository."""
     data = []
     with urllib.request.urlopen(app_settings.RULE_UPDATE_FILE) as f:
         raw = f.read().decode('utf-8')
@@ -12,6 +13,11 @@ def retrieve_rule_data():
     return data
 
 def update_rules(force=False):
+    """Updates the local rule database from the global data repository.
+
+    The data is only requested if a minimum time period since the last update has passed.
+    Can be forced by calling with force=True.
+    """
     last_update = app_settings.get_stored(app_settings.KEY_LAST_RULE_UPDATE, default=None)
     last_update = float(last_update if last_update else 0)
 
@@ -35,6 +41,7 @@ def update_rules(force=False):
     # delete all stored rules
     CspRule.objects.get_global().delete()
 
+    # insert the new rules into the local database
     rule_directive_counter = 0
     for rule in rule_database['rules']:
         for directive in rule['directives']:

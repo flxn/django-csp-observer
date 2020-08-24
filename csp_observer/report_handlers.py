@@ -9,7 +9,10 @@ REPORT_TYPE_TRIPWIRE = 'tripwire'
 logger = logging.getLogger(__name__)
 
 def raw_csp_report_to_model(raw_data, session):
-    """Takes raw csp report data and session object and creates a base CspReport model without saving"""
+    """Takes raw csp report data and session object and creates a base CspReport model.
+    
+    The returned model instance is not saved yet.
+    """
     report = CspReport()
 
     report.session = session
@@ -37,7 +40,7 @@ def raw_csp_report_to_model(raw_data, session):
     return report
 
 def handle_csp_report(report_data, session_id):
-    """Process incoming CSP reports"""
+    """Processes incoming CSP reports."""
     if not 'csp-report' in report_data:
         return
 
@@ -62,9 +65,11 @@ def handle_csp_report(report_data, session_id):
             logger.info("Report will be ignored")
     
 def handle_tripwire_report(report_data, session_id):
-    """Process incoming Tripwire reports"""
+    """Processes incoming Tripwire reports."""
     logger.info("Received Tripwire report")
     reports = []
+
+    # retrieve corresponding session and already received reports
     try:
         session = Session.objects.get(id=session_id)
     except Session.DoesNotExist:

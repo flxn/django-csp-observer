@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def report(request, report_type, session_id):
+    """Handles CSP report-uri requests."""
     if app_settings.REMOTE_REPORTING or request.method != 'POST':
         # don't do anything if remote reporting is enabled
         return HttpResponse('')
@@ -42,6 +43,7 @@ def report(request, report_type, session_id):
     return HttpResponse('')
 
 def result(request, session_id):
+    """Handles result requests from the clientui component."""
     if app_settings.REMOTE_REPORTING:
         # don't do anything if remote reporting is enabled
         return HttpResponse('')
@@ -64,6 +66,7 @@ def result(request, session_id):
     return JsonResponse(list(rules.values()), safe=False)
 
 def result_detail(request, session_id):
+    """Handles the request to the scan report page where the user can view their session reports."""
     if app_settings.REMOTE_REPORTING:
         # don't do anything if remote reporting is enabled
         return HttpResponse('')
@@ -92,6 +95,7 @@ def result_detail(request, session_id):
 @require_POST
 @csrf_exempt
 def master_session(request, session_id):
+    """Handles the remote creation of a new session if instance is master collector."""
     if not app_settings.IS_MASTER_COLLECTOR:
         return HttpResponse('')
     if not app_settings.REMOTE_SECRET or len(app_settings.REMOTE_SECRET) == 0:
@@ -122,10 +126,11 @@ class CspRuleForm(forms.ModelForm):
 @never_cache
 @csrf_exempt
 def admin(request):
+    """Handles access of the admin dashboard."""
     cspreports = CspReport.objects.all().order_by('-created_at')
     paginator1 = Paginator(cspreports, 5)
 
-    csprules = CspRule.objects.get_custom().order_by('title') # This should be changed to rules, but I have reports for testing purposes
+    csprules = CspRule.objects.get_custom().order_by('title')
     paginator2 = Paginator(csprules, 5)
     
     global_database_rules = CspRule.objects.get_global().values('global_id', 'title', 'short_description').distinct().order_by('title')
@@ -164,6 +169,7 @@ def admin(request):
 
 @require_POST
 def admin_update_rules(request):
+    """Handles the manual global rule update request from the admin dashboard."""
     try:
         count_pre, new_rules, count_post = update_rules(force=True)
         return JsonResponse({
@@ -181,6 +187,7 @@ def admin_update_rules(request):
 
 @require_POST
 def delete_custom_rule(request, rule_id):
+    """Handles the custom rule deletion request from the admin dashboard."""
     try:
         num_deleted, _ = CspRule.objects.get(id=rule_id).delete()
         return JsonResponse({
@@ -195,6 +202,7 @@ def delete_custom_rule(request, rule_id):
 
 @require_POST
 def share_session(request, session_id):
+    """Handles the user's voluntary data sharing request from the result detail (scan report) page."""
     session = get_object_or_404(Session, pk=session_id)
     reports_without_match = [model_to_dict(x) for x in session.cspreport_set.filter(matching_rules=None)]
 
@@ -226,6 +234,7 @@ def privacy(request):
 #
 
 def chart_observed_rule_distribution(request):
+    """Returns the JSON data for the observed rule distribution chart on the admin dashboard."""
     counts = {}
     first_relevant_date = timezone.now() - timedelta(days=14)
     reports = CspReport.objects.filter(created_at__gt=first_relevant_date)
@@ -248,6 +257,7 @@ def chart_observed_rule_distribution(request):
     return JsonResponse(chart_data)
 
 def chart_reports_per_day(request):
+    """Returns the JSON data for the reports per day chart on the admin dashboard."""
     counts = {}
     first_relevant_date = timezone.now() - timedelta(days=14)
     reports = CspReport.objects.filter(created_at__gt=first_relevant_date).extra(select={'day': 'date( created_at )'}).values('day') \

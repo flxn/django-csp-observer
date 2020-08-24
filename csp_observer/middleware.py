@@ -14,6 +14,8 @@ from .report_handlers import REPORT_TYPE_CSP, REPORT_TYPE_TRIPWIRE
 from .remote import create_master_session
 
 class CspReportMiddleware:
+    """The main middleware that handles all of CSP-Observer's business logic."""
+
     def __init__(self, get_response):
         self.super_get_response = get_response
         self.logger = logger = logging.getLogger(__name__)
@@ -40,11 +42,11 @@ class CspReportMiddleware:
         return response
 
     def anonymize_ip(self, ip_address):
-        """Removes the last two octets from the ip_address"""
+        """Removes the last two octets from the ip_address."""
         return ".".join(ip_address.split(".")[:2] + 2*["0"])
 
     def create_session(self, request):
-        """Creates a new session object, stores it in the database and returns the session id"""
+        """Creates a new session object, stores it in the database and returns the session id."""
         session = Session(
             user_agent=request.META["HTTP_USER_AGENT"],
             anonymized_ip=self.anonymize_ip(request.META["REMOTE_ADDR"])
@@ -54,11 +56,12 @@ class CspReportMiddleware:
         return session.id
 
     def get_csp_policy(self, request, session_id):
-        """Adds a CSP header to the response, returns the response"""
+        """Returns the CSP policy string based on the current settings."""
         if app_settings.REMOTE_REPORTING:
             report_uri = "{}/report/{}/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, REPORT_TYPE_CSP, session_id)
         else:
             report_uri = request.build_absolute_uri(reverse('report', args=(REPORT_TYPE_CSP, session_id, )))
+        
         # set fallback reporting directive
         middleware_directives = {
             'report-uri': [report_uri],
@@ -72,7 +75,7 @@ class CspReportMiddleware:
 
         # New Reporting API stuff (not working?!):
         # https://w3c.github.io/reporting/
-        #response["Reporting-Endpoints"] = '{}="{}"'.format(self.reporting_group_name, report_uri)
+        # response["Reporting-Endpoints"] = '{}="{}"'.format(self.reporting_group_name, report_uri)
         report_to_group_definition = {
             "group": self.reporting_group_name,
             "max_age": 86400,
@@ -100,11 +103,13 @@ class CspReportMiddleware:
         return csp_policy_string
 
     def add_csp_header(self, request, response, session_id):
+        """Adds the CSP header to the response."""
         policy = self.get_csp_policy(request, session_id)
         response[self.csp_header_name] = policy
         return response
 
     def add_cors_header(self, request, response):
+        """Adds the CORS headers required for master reporting instances."""
         origins = ' '.join(app_settings.AUTHORIZED_REPORTERS)
         if 'Access-Control-Allow-Origin' in response:
             origins = response['Access-Control-Allow-Origin'] + ' ' + origins
@@ -114,6 +119,7 @@ class CspReportMiddleware:
         return response
 
     def add_tripwire(self, request, response, session_id):
+        """Injects the tripwire javascript component into HTML response."""
         tripwire_js_path = static('csp_observer/js/tripwire.js')
         tripwire_js_uri = request.build_absolute_uri(tripwire_js_path)
         
@@ -135,11 +141,13 @@ class CspReportMiddleware:
         return response
 
     def add_script_nonce(self, request, response):
+        """Injects nonce attribute into all script tags in HTML response."""
         nonce_script_tag = '<script nonce="{}"'.format(self.nonce)
         response.content = response.content.replace(b'<script', str.encode(nonce_script_tag))
         return response
     
     def add_style_nonce(self, request, response):
+        """Injects nonce attribute into all style and link tags in HTML response."""
         nonce_style_tag = '<style nonce="{}"'.format(self.nonce)
         response.content = response.content.replace(b'<style', str.encode(nonce_style_tag))
         nonce_link_tag = '<link nonce="{}"'.format(self.nonce)
@@ -147,6 +155,7 @@ class CspReportMiddleware:
         return response
 
     def add_clientui(self, request, response, session_id):
+        """Injects the clientui javascript component, responsible for the popup dialog, into HTML response."""
         if app_settings.REMOTE_REPORTING:
             result_uri = "{}/result/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, session_id)
             detailpage_uri = "{}/resultdetail/{}".format(app_settings.REMOTE_CSP_OBSERVER_URL, session_id)
@@ -164,6 +173,7 @@ class CspReportMiddleware:
         return response
 
     def __call__(self, request):
+        """Checks current request path to decide if it should be observed or not."""
         # check if path in enabled paths
         for path_regex in self.paths_regex:
             if path_regex.match(request.path):

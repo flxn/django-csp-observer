@@ -3,7 +3,7 @@ from django.db import models
 from .managers import CspRuleManager
 
 class Session(models.Model):
-    """Session model"""
+    """Represents a single user session (a page access)."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_agent = models.CharField(max_length=255)
     anonymized_ip = models.CharField(max_length=255)
@@ -13,9 +13,7 @@ class Session(models.Model):
         return "{}@{}".format(self.id, self.created_at)
 
 class CspRule(models.Model):
-    """
-    Represents a rule for evaluation of csp errors or whitelisting.
-    """
+    """Represents a rule for evaluation of csp errors or whitelisting."""
     CAUSES = (
         ('extension', 'Browser Extension'),
         ('browser', 'Web Browser'),
@@ -38,8 +36,8 @@ class CspRule(models.Model):
         return "{} {} ({}) {}".format(self.global_id if self.global_id else "", self.title, self.blocked_url, "[Ignore]" if self.ignore else "")
 
 class CspReport(models.Model):
-    """
-    CSP Report model.
+    """CSP Report model.
+
     Follows the new CSPViolationReportBody (https://w3c.github.io/webappsec-csp/#cspviolationreportbody)
     """
     session = models.ForeignKey(Session, to_field="id", on_delete=models.CASCADE)
@@ -61,9 +59,7 @@ class CspReport(models.Model):
         return "{}@{}".format(self.blocked_url, self.session)
 
 class StoredConfig(models.Model):
-    """
-    Generic model for storing key/value pairs.
-    """
+    """Generic model for storing key/value pairs."""
     key = models.TextField(unique=True)
     value = models.TextField(blank=True, null=True)
 
