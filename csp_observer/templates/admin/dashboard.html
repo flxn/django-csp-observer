@@ -19,26 +19,28 @@
             <thead>
               <tr>
                 <th scope="col">Blocked URL</th>
+                <th scope="col"></th>
                 <th scope="col">Effective directive</th>
                 <th scope="col">Created at</th>
                 <th scope="col">Ignore event</th>
               </tr>
             </thead>
             <tbody>
-              {% for post in cspreports %}
+              {% for report in cspreports %}
               <tr>
-                <td>{{post.blocked_url}}</td>
-                <td>{{post.effective_directive}}</td>
-                <td>{{post.created_at}}</td>
+                <td>{{report.blocked_url}}</td>
+                <td><span class="badge {% if report.disposition == 'report' %}badge-primary{% elif report.disposition == 'tripwire'%}badge-info{% endif %}">{{report.disposition}}</span></td>
+                <td>{{report.effective_directive}}</td>
+                <td>{{report.created_at}}</td>
                 <td>
                   <form method="POST">
                     <input style="display:none" id="blocked_url" type="text" name="blocked_url"
-                      value="{{ post.blocked_url }}">
+                      value="{{ report.blocked_url }}">
                     <input style="display:none" id="title" type="text" name="title" value="title">
                     <input style="display:none" id="short_description" type="text" name="short_description"
                       value="short_description">
                     <input style="display:none" id="effective_directive" type="text" name="effective_directive"
-                      value="{{ post.effective_directive }}">
+                      value="{{ report.effective_directive }}">
                     <input type="submit" class="btn btn-sm btn-outline-danger" value="Ignore" name="mybtn" />
                   </form>
                 </td>
