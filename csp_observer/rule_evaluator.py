@@ -1,3 +1,4 @@
+import re
 from .models import CspRule
 
 class CspRuleEvaluator(object):
@@ -13,10 +14,12 @@ class CspRuleEvaluator(object):
         """
         matching_rules = []
         ignore = False
+        if not url:
+            return (matching_rules, ignore)
         for rule in self.rules:
-            if rule.blocked_url == url:
+            if re.match(rule.blocked_url, url):
                 # url matches, now check directive if rule requires matching directive
-                if rule.effective_directive == None or rule.effective_directive.replace('-elem', '') == directive.replace('-elem', ''):
+                if (not rule.effective_directive) or (rule.effective_directive and rule.effective_directive.replace('-elem', '') == directive.replace('-elem', '')):
                     matching_rules.append(rule)
                     if rule.ignore:
                         ignore = True
