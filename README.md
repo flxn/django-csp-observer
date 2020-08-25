@@ -1,8 +1,12 @@
 # CSP Observer
 
-![CSP Observer Logo](csp_observer/static/csp_observer/img/cspo-logo.png)
+<center>
+
+![CSP Observer Logo](csp_observer/static/csp_observer/img/cspo-logo-256px.png)
 
 CSP Observer is a Django app that monitors incoming Content Security Policy (CSP) reports for your site. It tries to detect security/privacy issues and notifies your visitors.
+
+</center>
 
 ## Installation
 
