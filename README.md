@@ -1,22 +1,36 @@
 # CSP Observer
-## Early prototype. Do not install.
+
+![CSP Observer Logo](csp_observer/static/csp_observer/img/cspo-logo.png)
+
 CSP Observer is a Django app that monitors incoming Content Security Policy (CSP) reports for your site. It tries to detect security/privacy issues and notifies your visitors.
 
 ## Installation
 
-1. Add "csp_observer" to your `INSTALLED_APPS`:
+1. In `settings.py` add "csp_observer" to your `INSTALLED_APPS`:
     ```
     INSTALLED_APPS = [
         ...
         'csp_observer',
     ]
     ```
-2. Include the url configuration in your `urls.py`:
+2. Also in `settings.py` add the following entry to `MIDDLEWARE`:
     ```
-    path('csp/', include('csp_observer.urls')),
+    MIDDLEWARE = [
+        ...
+        'csp_observer.middleware.CspReportMiddleware',
+    ]
     ```
-3. Run ``python manage.py migrate`` to create the necessary database tables.
-4. The basic installation is finished! View the *Configuration* section for more information on how to configure the app.
+3. Include the url configuration in your `urls.py`:
+    ```
+    from django.urls import path, include
+    
+    urlpatterns = [
+        ...
+        path('csp/', include('csp_observer.urls')),
+    ]
+    ```
+4. Run ``python manage.py migrate`` to create the necessary database tables.
+5. The basic installation is finished! View the *Configuration* section for more information on how to configure the app.
 
 ## Admin Interface
 
@@ -50,3 +64,6 @@ Overview of all available settings and their default values:
 | REMOTE_REPORTING | ``False`` | Wether to use a central remote collector or not. |
 | REMOTE_CSP_OBSERVER_URL | ``''`` | The URL of the remote collector instance. Must be the path to the *csp_observer* app, as defined in *urls.py*. Example: ``http://example.com/csp`` |
 | CLIENTUI_VISIBILITY | ``always`` | Choose if the client popup should always be visible (``always``) or only if a problem has been detected (``minimized``) |
+| RULE_UPDATE_FILE | ``https://raw.githubusercontent.com/flxn/csp-observer-data/master/rules.json`` | The path to the file that contains the global rule database |
+| RULE_UPDATE_INTERVAL | ``21600`` | The minimum number of seconds before a new rule update is allowed |
+| VOLUNTARY_DATA_SHARING_URL | ``https://csp-observer-reports.flxn.de`` | The URL that the unknown report data of the data sharing is sent to. |

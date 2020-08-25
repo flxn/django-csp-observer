@@ -1,6 +1,5 @@
 {% extends 'cspo_base.html' %}
 {% load static %}
-{% load cspo_markdown %}
 
 {% block title %}Scan Result{% endblock title %}
 
@@ -47,7 +46,7 @@
                     
                         <div id="collapse{{rule.global_id}}" class="collapse" aria-labelledby="heading{{rule.global_id}}" data-parent="#accordionExample">
                         <div class="card-body">
-                            {{rule.long_description | cspo_markdown | safe}}
+                            {{rule.long_description | safe}}
                         </div>
                         </div>
                     </div>

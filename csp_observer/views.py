@@ -22,6 +22,7 @@ from django.views.generic import ListView
 from django import forms
 from django.forms.models import model_to_dict
 from django.db.models import Count
+import markdown as md
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,10 @@ def result_detail(request, session_id):
         'session': model_to_dict(session),
         'unknown_reports': reports_without_match
     }
+
+    # prerender markdown here so we don't need a custom templatetag
+    for k in rules.keys():
+        rules[k].long_description = md.markdown(rules[k].long_description, extensions=['markdown.extensions.fenced_code'])
 
     return render(request, 'client_ui/result_detail.html', {
         'rules': rules, 
@@ -247,7 +252,7 @@ def chart_observed_rule_distribution(request):
     reports = CspReport.objects.filter(created_at__gt=first_relevant_date)
 
     for report in reports:
-        raw_data = report.matching_rules.values('global_id', 'title').annotate(observed_count=Count('global_id'))
+        raw_data = report.matching_rules.values('global_id', 'title').annotate(observed_count=Count('id'))
         for val in raw_data:
             label = "{} ({})".format(val['title'], val['global_id'])
             if not label in counts:

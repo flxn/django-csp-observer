@@ -1,4 +1,8 @@
 #cspo-clientui {
+  font-family: BlinkMacSystemFont,-apple-system,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,Helvetica,Arial,sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #212529;
   position: fixed;
   bottom: 10px;
   right: 10px;
@@ -15,6 +19,31 @@
   transition: margin 0.2s;
   opacity: 0;
   margin-bottom: -1000px;
+}
+
+#cspo-clientui * {
+  box-sizing: border-box;
+}
+
+#cspo-clientui button, #cspo-clientui select {
+  text-transform: none;
+}
+#cspo-clientui button, #cspo-clientui input {
+  overflow: visible;
+}
+#cspo-clientui button, #cspo-clientui input, #cspo-clientui optgroup, #cspo-clientui select, #cspo-clientui textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+#cspo-clientui button {
+  border-radius: 0;
+}
+
+#cspo-clientui p {
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 #cspo-clientui.visible {
@@ -47,6 +76,20 @@
   right: 10px;
   top: 5px;
   outline: none;
+  cursor: pointer;
+  padding: 0;
+  background-color: transparent;
+  border: 0;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  float: right;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  opacity: .5;
 }
 
 .clientui-body {
