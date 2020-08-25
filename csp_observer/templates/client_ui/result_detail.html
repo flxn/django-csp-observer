@@ -14,49 +14,58 @@
     <img id="cspo-icon" src="{% static 'csp_observer/img/cspo-logo-256px.png' %}" alt="The CSP Observer Logo: A small telescope with the letter CSP above it.">
     <h1>Scan Report</h1>
     <h3>We have detected {{rules|length }} possible issue{{rules|length|pluralize}} with your web browser.</h2>
-    {% for rule in rules.values %}
-    <div class="card mt-5">
-        <div class="card-header">
-            {{rule.title}}
-        </div>
-        <div class="card-body">
-        <a href="https://github.com/flxn/csp-observer-data/blob/master/rules/{{rule.global_id}}.md" target="_blank" class="float-right">View In Database</a>
-        <h5 class="card-title">{{ rule.short_description }}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Probably caused by: {{ rule.get_cause_display }}</h6>
-        <p class="card-text">
-            <div class="accordion" id="accordionExample">
-                <div class="card">
-                    <div class="card-header" id="heading{{rule.global_id}}">
-                    <h2 class="mb-0">
-                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{rule.global_id}}" aria-expanded="true" aria-controls="collapse{{rule.global_id}}">
-                            <svg class="if-collapsed" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                            </svg>
-                            <svg class="if-not-collapsed" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                            </svg>
-                            View details about this detection
-                        </button>
-                        
-                    </h2>
-                    </div>
-                
-                    <div id="collapse{{rule.global_id}}" class="collapse" aria-labelledby="heading{{rule.global_id}}" data-parent="#accordionExample">
-                    <div class="card-body">
-                        {{rule.long_description | cspo_markdown | safe}}
-                    </div>
+    <div class="mt-5">
+        {% for rule in rules.values %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-info-circle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM8 5.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                  </svg>
+                  {{rule.title}}
+            </div>
+            <div class="card-body">
+            <a href="https://github.com/flxn/csp-observer-data/blob/master/rules/{{rule.global_id}}.md" target="_blank" class="float-right">View In Database</a>
+            <h5 class="card-title">{{ rule.short_description }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Probably caused by: {{ rule.get_cause_display }}</h6>
+            <p class="card-text">
+                <div class="accordion" id="accordionExample">
+                    <div class="card">
+                        <div class="card-header" id="heading{{rule.global_id}}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{rule.global_id}}" aria-expanded="true" aria-controls="collapse{{rule.global_id}}">
+                                <svg class="if-collapsed" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                                <svg class="if-not-collapsed" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                                View details about this detection
+                            </button>
+                            
+                        </h2>
+                        </div>
+                    
+                        <div id="collapse{{rule.global_id}}" class="collapse" aria-labelledby="heading{{rule.global_id}}" data-parent="#accordionExample">
+                        <div class="card-body">
+                            {{rule.long_description | cspo_markdown | safe}}
+                        </div>
+                        </div>
                     </div>
                 </div>
+            </p>
             </div>
-        </p>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 
     <hr>
 
     {% if other_reports|length > 0 %}
-        <h3>We also detected {{other_reports|length}} unknown request{{other_reports|length|pluralize}} from your browser.</h3>
+        <h3>
+            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-question-circle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.57 6.033H5.25C5.22 4.147 6.68 3.5 8.006 3.5c1.397 0 2.673.73 2.673 2.24 0 1.08-.635 1.594-1.244 2.057-.737.559-1.01.768-1.01 1.486v.355H7.117l-.007-.463c-.038-.927.495-1.498 1.168-1.987.59-.444.965-.736.965-1.371 0-.825-.628-1.168-1.314-1.168-.901 0-1.358.603-1.358 1.384zm1.251 6.443c-.584 0-1.009-.394-1.009-.927 0-.552.425-.94 1.01-.94.609 0 1.028.388 1.028.94 0 .533-.42.927-1.029.927z"/>
+            </svg> We also detected {{other_reports|length}} unknown request{{other_reports|length|pluralize}} from your browser.
+        </h3>
         <p>
             This service relies on voluntary data from the community for analysis. 
             <br/>You can help us to improve our detection by sharing your data and help improve the privacy of all other users.

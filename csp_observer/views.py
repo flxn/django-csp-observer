@@ -62,6 +62,9 @@ def result(request, session_id):
         for rule in report.matching_rules.get_global():
             if not rule.global_id in rules:
                 rules[rule.global_id] = model_to_dict(rule)
+        for rule in report.matching_rules.get_custom():
+            if not rule.id in rules:
+                rules[rule.id] = model_to_dict(rule)
     
     return JsonResponse(list(rules.values()), safe=False)
 
@@ -78,6 +81,9 @@ def result_detail(request, session_id):
         for rule in report.matching_rules.get_global():
             if not rule.global_id in rules:
                 rules[rule.global_id] = rule
+        for rule in report.matching_rules.get_custom():
+            if not rule.id in rules:
+                rules[rule.id] = rule
     reports_without_match = [model_to_dict(x) for x in reports.filter(matching_rules=None)]
 
     shared_data = {
