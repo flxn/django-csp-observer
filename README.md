@@ -24,6 +24,7 @@ CSP Observer is a Django app that monitors incoming Content Security Policy (CSP
         'csp_observer.middleware.CspReportMiddleware',
     ]
     ```
+    Please make sure that it is the last entry in the middlewares, otherwise another installed middleware could interfere with the operation of CSP Observer.
 3. Include the url configuration in your `urls.py`:
     ```
     from django.urls import path, include
@@ -33,6 +34,7 @@ CSP Observer is a Django app that monitors incoming Content Security Policy (CSP
         path('csp/', include('csp_observer.urls')),
     ]
     ```
+    You can change this path but keep in mind, that this path determines the access URL to the admin dashboard. Example: If you change the path for CSP Observer to `path('cspobserver/', ...)`, the admin dashboard will now be accessible at `/cspobserver/admin`.
 4. Run ``python manage.py migrate`` to create the necessary database tables.
 5. The basic installation is finished! View the *Configuration* section for more information on how to configure the app.
 
@@ -46,7 +48,7 @@ List of commands integrated into *manage.py*:
 
 | Command | Description |
 | ------- | ----------- |
-| `cleansessions` | Removes old sessions and reports from the database. Should be run regularly. |
+| `cleanunused` | Removes old sessions and reports from the database. Should be run regularly. |
 | `updaterules` | Updates the rules from the central rule repository. |
 
 ## Configuration
