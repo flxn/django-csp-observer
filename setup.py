@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='django-csp-observer',
-    version='1.0',
+    version='1.0.2',
     description='A Django app that evaluates CSP reports to identify malicious activity.',
     long_description=long_description,
     long_description_content_type="text/markdown",
